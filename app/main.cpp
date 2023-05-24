@@ -20,10 +20,8 @@ using std::stringstream;
 /*
  * STATIC PROTOTYPES
  */
-static void setup(void);
 static void setup_i2c(void);
 static void setup_gpio(void);
-static void system_clock_config(void);
 static void log_device_info(void);
 static inline void set_defaults(Prefs& settings);
 
@@ -51,7 +49,7 @@ uint32_t SECURE_SystemCoreClockUpdate() {
 /**
  * @brief System clock configuration.
  */
-static void system_clock_config(void) {
+void system_clock_config(void) {
     
     SystemCoreClockUpdate();
     HAL_InitTick(TICK_INT_PRIORITY);
@@ -94,16 +92,6 @@ static void setup_i2c(void) {
 
 
 /**
- * @brief Umbrella setup routine.
- */
-static void setup(void) {
-    
-    setup_gpio();
-    setup_i2c();
-}
-
-
-/**
  * @brief Show basic device info.
  */
 static void log_device_info(void) {
@@ -122,21 +110,21 @@ static void log_device_info(void) {
 
 int main() {
 
-    // Reset of all peripherals, Initializes the Flash interface and the Systick.
+    // Reset of all peripherals, initializes the Flash interface and the Systick.
     HAL_Init();
 
     // Configure the system clock
     system_clock_config();
-    
-    // Set up the hardware
-    setup();
-    HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_SET);
     
     // Open the network
     Config::Network::open();
     
     // Get the Device ID and build number
     log_device_info();
+    
+    // Set up the hardware
+    setup_gpio();
+    setup_i2c();
     
     // Instantiate the display driver
     HT16K33_Segment display = HT16K33_Segment(HT16K33_ADDRESS);

@@ -56,13 +56,18 @@ bool get_prefs(Prefs& prefs) {
     }
     
     // Wait for the data to arrive
-    server_log("Awaiting params");
+    server_log("Awaiting params...");
     received_config = false;
+    uint32_t count = 0;
     uint32_t last_tick = HAL_GetTick();
-    while(HAL_GetTick() - last_tick < CONFIG_WAIT_PERIOD_MS) {
-        // `received_config` should be set by the IRS in
+    uint32_t now_tick = last_tick;
+    while(now_tick - last_tick < CONFIG_WAIT_PERIOD_MS) {
+        // `received_config` should be set by the ISR in
         // response to a data-available notification
         if (received_config) break;
+        count++;
+        if (count % 10 == 0) server_log("%lu", now_tick - last_tick);
+        now_tick = HAL_GetTick();
     }
     
     if (!received_config) {
@@ -294,7 +299,7 @@ void setup_notification_center(void) {
 void TIM1_BRK_IRQHandler(void) {
     
     // Check for readable data in the HTTP channel
-    HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_SET);
     bool got_notification = false;
     volatile MvNotification& notification = notification_center[notification_index];
     switch(notification.tag) {
