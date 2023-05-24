@@ -51,7 +51,11 @@ class HT16K33_Segment {
     private:
         uint8_t             buffer[16];
         uint32_t            i2c_addr;
+        // Following are populated in the constructor
+        const uint8_t       CHARSET[18];
+        const uint8_t       POS[4];
         
+        /*
         // The key alphanumeric characters we can show:
         // 0-9, A-F, minus, degree
         static constexpr uint8_t  CHARSET[18] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F,
@@ -59,6 +63,7 @@ class HT16K33_Segment {
 
         // The positions of the segments within the buffer
         static constexpr uint32_t POS[4] = {0, 2, 6, 8};
+        */
 };
 
 

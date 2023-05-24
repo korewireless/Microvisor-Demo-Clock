@@ -13,12 +13,19 @@
 using std::string;
 
 
+
+
 /**
  * @brief Basic driver for HT16K33-based display.
  *
  * @param address: The display's I2C address. Default: 0x70.
  */
-HT16K33_Segment::HT16K33_Segment(uint32_t address) {
+HT16K33_Segment::HT16K33_Segment(uint32_t address) 
+
+    :CHARSET{0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F,
+             0x6F, 0x5F, 0x7C, 0x58, 0x5E, 0x7B, 0x71, 0x40, 0x63},
+     POS{0, 2, 6, 8}
+{
     
     if (address == 0x00 || address > 0x7F) address = HT16K33_ADDRESS;
     i2c_addr = address;
@@ -102,8 +109,8 @@ HT16K33_Segment& HT16K33_Segment::set_glyph(uint32_t glyph, uint32_t digit, bool
     
     if (digit > 4) return *this;
     if (glyph > 0xFF) return *this;
-    buffer[POS[digit]] = glyph;
-    if (has_dot) buffer[POS[digit]] |= 0x80;
+    buffer[HT16K33_Segment::POS[digit]] = glyph;
+    if (has_dot) buffer[HT16K33_Segment::POS[digit]] |= 0x80;
     return *this;
 }
 
@@ -154,8 +161,8 @@ HT16K33_Segment& HT16K33_Segment::set_alpha(char chr, uint32_t digit, bool has_d
     }
 
     if (char_val == 0xFF) return *this;
-    buffer[POS[digit]] = CHARSET[char_val];
-    if (has_dot) buffer[POS[digit]] |= 0x80;
+    buffer[HT16K33_Segment::POS[digit]] = HT16K33_Segment::CHARSET[char_val];
+    if (has_dot) buffer[HT16K33_Segment::POS[digit]] |= 0x80;
     return *this;
 }
 
