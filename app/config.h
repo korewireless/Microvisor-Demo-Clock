@@ -15,7 +15,7 @@
  * CONSTANTS
  */
 #define     SHARED_NC_BUFFER_SIZE_R             16
-#define     CONFIG_WAIT_PERIOD_MS               200
+#define     CONFIG_WAIT_PERIOD_MS               2000
 #define     CONFIG_RX_BUFFER_SIZE_B             512
 #define     CONFIG_TX_BUFFER_SIZE_B             512
 

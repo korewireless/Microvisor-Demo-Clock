@@ -22,10 +22,12 @@ using std::stringstream;
  * @param in_prefs:   Reference to the app's preferences data.
  * @param in_display: Reference to the app's display instance.
  */
-Clock::Clock(Prefs& in_prefs, HT16K33_Segment& in_display) {
-    
-    prefs = in_prefs;
-    display = in_display;
+Clock::Clock(Prefs& in_prefs, HT16K33_Segment& in_display)
+
+    :prefs(in_prefs),
+     display(in_display)
+{
+
 }
 
 

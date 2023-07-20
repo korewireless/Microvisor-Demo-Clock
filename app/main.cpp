@@ -14,15 +14,14 @@
 using std::vector;
 using std::string;
 using std::vector;
-using std::stringstream;
 
 
 /*
  * STATIC PROTOTYPES
  */
-static void setup_i2c(void);
-static void setup_gpio(void);
-static void log_device_info(void);
+static        void setup_i2c(void);
+static        void setup_gpio(void);
+static        void log_device_info(void);
 static inline void set_defaults(Prefs& settings);
 
 /*
@@ -68,9 +67,6 @@ static void setup_gpio(void) {
     // Enable GPIO port clock
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
-    // Configure GPIO pin output Level
-    HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_RESET);
-
     // Configure GPIO pin for the on-board LED
     GPIO_InitTypeDef gpio_init = { 0 };
     gpio_init.Pin   = LED_GPIO_PIN;
@@ -78,6 +74,9 @@ static void setup_gpio(void) {
     gpio_init.Pull  = GPIO_PULLUP;
     gpio_init.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     HAL_GPIO_Init(LED_GPIO_BANK, &gpio_init);
+
+    // Clear the LED
+    HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_RESET);
 }
 
 
@@ -116,18 +115,13 @@ int main() {
     // Configure the system clock
     system_clock_config();
     
-    // Open the network
-    Config::Network::open();
-    
-    // Get the Device ID and build number
-    log_device_info();
-    
     // Set up the hardware
     setup_gpio();
     setup_i2c();
     
     // Instantiate the display driver
     HT16K33_Segment display = HT16K33_Segment(HT16K33_ADDRESS);
+    display.init();
     
     // Set the default prefs
     Prefs prefs;
@@ -139,8 +133,18 @@ int main() {
     for (uint32_t i = 0 ; i < 4 ; ++i) display.set_glyph(sync[i], i, false);
     display.draw();
     
-    Config::Channel::open();
-    if (Config::get_prefs(prefs)) server_log("GOT PREFS");
+    // Open the network
+    Config::Network::open();
+
+    // Get the Device ID and build number
+    log_device_info();
+
+    //Config::Channel::open();
+    if (Config::get_prefs(prefs)) {
+        server_log("GOT PREFS");
+    } else {
+        server_error("NOT GOT PREFS");
+    }
     
     // Instantiate a Clock object and run it
     Clock mvclock = Clock(prefs, display);

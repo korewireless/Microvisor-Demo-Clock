@@ -25,7 +25,6 @@ static          Handles         handles = { 0, 0, 0 };
 
 namespace Config {
 
-
 bool get_prefs(Prefs& prefs) {
     
     // Check for a valid channel handle
@@ -54,29 +53,35 @@ bool get_prefs(Prefs& prefs) {
         Channel::close();
         return false;
     }
-    
+
     // Wait for the data to arrive
     server_log("Awaiting params...");
     received_config = false;
-    uint32_t count = 0;
-    uint32_t last_tick = HAL_GetTick();
-    uint32_t now_tick = last_tick;
-    while(now_tick - last_tick < CONFIG_WAIT_PERIOD_MS) {
+    uint32_t start_tick = HAL_GetTick();
+    //uint64_t start_us = 0;
+    //uint64_t latest_us = 0;
+    //mvGetMicroseconds(&start_us);
+    server_log("Start us: %lu", start_tick);
+
+    while (1) {
         // `received_config` should be set by the ISR in
         // response to a data-available notification
         if (received_config) break;
-        count++;
-        if (count % 10 == 0) server_log("%lu", now_tick - last_tick);
-        now_tick = HAL_GetTick();
+
+        // Break out after 2s (1 tick ~ 1ms)
+        uint32_t now_tick = HAL_GetTick();
+        if (now_tick % 100 == 0) server_log("Now %lu", now_tick);
+        if (now_tick - start_tick > 2000) break;
+        HAL_Delay(10);
     }
     
     if (!received_config) {
         // Request timed out
-        server_error("Config fetch request timed out (%lu ticks)", HAL_GetTick() - last_tick);
+        server_error("Config fetch request timed out (%lu ticks)", 42);
         Channel::close();
         return false;
     }
-    
+
     // Parse the received data record
     server_log("Received params");
     MvConfigResponseData response;
@@ -140,7 +145,7 @@ bool open(void) {
     
     // Set up the HTTP channel's multi-use send and receive buffers
     static volatile uint8_t config_rx_buffer[CONFIG_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
-    static volatile uint8_t config_tx_buffer[CONFIG_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
+    static volatile uint8_t config_tx_buffer[CONFIG_TX_BUFFER_SIZE_B] __attribute__((aligned(512)));
     
     if (handles.channel == 0) {
         // No network connection yet? Then establish one
@@ -299,7 +304,7 @@ void setup_notification_center(void) {
 void TIM1_BRK_IRQHandler(void) {
     
     // Check for readable data in the HTTP channel
-    HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_SET);
+    //HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_SET);
     bool got_notification = false;
     volatile MvNotification& notification = notification_center[notification_index];
     switch(notification.tag) {

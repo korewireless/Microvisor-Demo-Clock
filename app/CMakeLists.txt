@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.14)
 # Set application data
 set(APP "Microvisor Clock Demo")
 set(VERSION_NUMBER "1.0.1")
-set(BUILD_NUMBER "186")
+set(BUILD_NUMBER "243")
 
 message("Building ${APP} ${VERSION_NUMBER} build ${BUILD_NUMBER}")
 
 # Pass in version data
-configure_file(app_version.in app_version.h)
+configure_file(app_version.in app_version.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Compile app source code file(s)
@@ -23,7 +23,7 @@ add_executable(${PROJECT_NAME}
     stm32u5xx_hal_timebase_tim_template.c
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES LINK_OPTIONS -Wstack-usage=8192)
+#set_target_properties(${PROJECT_NAME} PROPERTIES LINK_OPTIONS -Wstack-usage=32768)
 
 # Link built libraries
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC
