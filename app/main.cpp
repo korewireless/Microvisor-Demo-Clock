@@ -3,7 +3,7 @@
  *
  * @version     1.0.0
  * @author      Tony Smith
- * @copyright   2023
+ * @copyright   2023, KORE Wireless
  * @licence     MIT
  *
  */
@@ -86,7 +86,7 @@ static void setup_gpio(void) {
 static void setup_i2c(void) {
     
     // Initialize the I2C bus for the display and sensor
-    I2C::setup();
+    I2C::setup(HT16K33_ADDRESS);
 }
 
 
@@ -123,7 +123,8 @@ int main() {
     HT16K33_Segment display = HT16K33_Segment(HT16K33_ADDRESS);
     display.init();
     
-    // Set the default prefs
+    // Create a preferencs store and
+    // set the defaults
     Prefs prefs;
     set_defaults(prefs);
     
@@ -134,22 +135,25 @@ int main() {
     display.draw();
     
     // Open the network
+    // NOTE Do this before calling `log_device_info()`
     Config::Network::open();
 
     // Get the Device ID and build number
     log_device_info();
 
-    //Config::Channel::open();
-    if (Config::get_prefs(prefs)) {
-        server_log("GOT PREFS");
+    // Load in the clock settings
+    bool got_prefs = Config::get_prefs(prefs);
+    if (got_prefs) {
+        server_log("Clock settings retrieved");
     } else {
-        server_error("NOT GOT PREFS");
+        server_error("Clock settings not yet retrieved");
     }
     
     // Instantiate a Clock object and run it
-    Clock mvclock = Clock(prefs, display);
+    Clock mvclock = Clock(prefs, display, got_prefs);
     mvclock.loop();
 
+    // Just in case...
     return 0;
 }
 

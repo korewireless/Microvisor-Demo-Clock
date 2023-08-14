@@ -14,6 +14,16 @@ using std::vector;
 using std::string;
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+// Required on STM32 HAL callouts implemented in C++
+void TIM8_BRK_IRQHandler(void);
+#ifdef __cplusplus
+}
+#endif
+
+
 // Central store for notification records.
 // Holds SHARED_NC_BUFFER_SIZE_R records at a time -- each record is 16 bytes in size.
 static volatile MvNotification  notification_center[SHARED_NC_BUFFER_SIZE_R] __attribute__((aligned(8)));
@@ -58,26 +68,15 @@ bool get_prefs(Prefs& prefs) {
     server_log("Awaiting params...");
     received_config = false;
     uint32_t start_tick = HAL_GetTick();
-    //uint64_t start_us = 0;
-    //uint64_t latest_us = 0;
-    //mvGetMicroseconds(&start_us);
-    server_log("Start us: %lu", start_tick);
 
-    while (1) {
-        // `received_config` should be set by the ISR in
-        // response to a data-available notification
-        if (received_config) break;
-
-        // Break out after 2s (1 tick ~ 1ms)
-        uint32_t now_tick = HAL_GetTick();
-        if (now_tick % 100 == 0) server_log("Now %lu", now_tick);
-        if (now_tick - start_tick > 2000) break;
-        HAL_Delay(10);
+    while (true) {
+        // Break out after timeout or successful config retrieval
+        if (received_config || (HAL_GetTick() - start_tick > CONFIG_WAIT_PERIOD_MS)) break;
     }
     
     if (!received_config) {
         // Request timed out
-        server_error("Config fetch request timed out (%lu ticks)", 42);
+        server_error("Config fetch request timed out");
         Channel::close();
         return false;
     }
@@ -117,16 +116,16 @@ bool get_prefs(Prefs& prefs) {
     }
     
     server_log("Received: %s", value);
-    
+
     // Copy the value data to the requested location
     DynamicJsonDocument settings(512);
     DeserializationError err = deserializeJson(settings, value);
     if (err == DeserializationError::Ok) {
-        prefs.mode = settings["mode"];
-        prefs.bst = settings["bst"];
-        prefs.colon = settings["colon"];
-        prefs.flash = settings["flash"];
-        prefs.brightness = settings["brightness"];
+        prefs.mode          = (bool)settings["mode"];
+        prefs.bst           = (bool)settings["bst"];
+        prefs.colon         = (bool)settings["colon"];
+        //prefs.flash         = (bool)settings["flash"];
+        prefs.brightness    = (uint32_t)settings["brightness"];
     }
     
     Channel::close();
@@ -266,18 +265,24 @@ void setup_notification_center(void) {
         memset((void *)notification_center, 0xff, sizeof(notification_center));
 
         // Configure a notification center for network-centric notifications
-        MvNotificationSetup notification_config;
-        notification_config.irq = TIM1_BRK_IRQn,
-        notification_config.buffer = (MvNotification*)notification_center,
-        notification_config.buffer_size = sizeof(notification_center);
+        //MvNotificationSetup notification_config;
+        //notification_config.irq = TIM8_BRK_IRQn,
+        //notification_config.buffer = (MvNotification*)notification_center,
+        //notification_config.buffer_size = sizeof(notification_center);
+
+        static struct MvNotificationSetup notification_config = {
+            .irq = TIM8_BRK_IRQn,
+            .buffer = (struct MvNotification *)notification_center,
+            .buffer_size = sizeof(notification_center)
+        };
 
         // Ask Microvisor to establish the notification center
         // and confirm that it has accepted the request
         enum MvStatus status = mvSetupNotifications(&notification_config, &handles.notification);
         if (status == MV_STATUS_OKAY) {
             // Start the notification IRQ
-            NVIC_ClearPendingIRQ(TIM1_BRK_IRQn);
-            NVIC_EnableIRQ(TIM1_BRK_IRQn);
+            NVIC_ClearPendingIRQ(TIM8_BRK_IRQn);
+            NVIC_EnableIRQ(TIM8_BRK_IRQn);
         } else {
             handles.notification = 0;
         }
@@ -301,7 +306,7 @@ void setup_notification_center(void) {
  * handles notifications from two channels, for config fetches and
  * HTTP requests, so we use tags to determine the source channel.
  */
-void TIM1_BRK_IRQHandler(void) {
+void TIM8_BRK_IRQHandler(void) {
     
     // Check for readable data in the HTTP channel
     //HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_SET);

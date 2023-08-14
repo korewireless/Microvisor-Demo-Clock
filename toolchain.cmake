@@ -32,7 +32,7 @@ set(CMAKE_CXX_FLAGS "-mcpu=cortex-m33 -g3 \
   -MMD -MP --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=soft -mthumb")
 
 set(CMAKE_CXX_LINK_FLAGS "-mcpu=cortex-m33 --specs=nosys.specs -Wl,--gc-sections -static \
-  -Wl,--start-group -lc -lm -Wl,--end-group -mfloat-abi=soft -u _printf_float -Wl,-z,stack-size=4194304" CACHE INTERNAL "")
+  -Wl,--start-group -lc -lm -Wl,--end-group -mfloat-abi=soft -u _printf_float -Wl,-z,stack-size=8388608" CACHE INTERNAL "")
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)

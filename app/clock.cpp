@@ -3,7 +3,7 @@
  *
  * @version     1.0.0
  * @author      Tony Smith
- * @copyright   2023
+ * @copyright   2023, KORE Wireless
  * @licence     MIT
  *
  */
@@ -21,11 +21,13 @@ using std::stringstream;
  *
  * @param in_prefs:   Reference to the app's preferences data.
  * @param in_display: Reference to the app's display instance.
+ * @param got_prefs:  Have we loaded clock settings yet?
  */
-Clock::Clock(Prefs& in_prefs, HT16K33_Segment& in_display)
+Clock::Clock(Prefs& in_prefs, HT16K33_Segment& in_display, bool got_prefs)
 
     :prefs(in_prefs),
-     display(in_display)
+     display(in_display),
+     received_prefs(got_prefs)
 {
 
 }
@@ -34,6 +36,8 @@ Clock::Clock(Prefs& in_prefs, HT16K33_Segment& in_display)
 /**
  * @brief Set the current time from the STM32U5 RTC
  *        via Microvisor.
+ *
+ * @returns `true` if the time was set, otherwise `false`.
  */
 bool Clock::set_time_from_rtc(void) {
     
@@ -46,7 +50,7 @@ bool Clock::set_time_from_rtc(void) {
         
         // Write time string as "2022-05-10 13:30:58"
         strftime(timestamp, 48, "%F %T", gmtime(&secs));
-        //server_log("%s", timestamp);
+
         // Convert the hour, minute and second values back
         sscanf(timestamp, "%lu-%lu-%lu %lu:%lu:%lu", &year, &month, &day, &hour, &minutes, &seconds);
         return true;
@@ -60,51 +64,56 @@ bool Clock::set_time_from_rtc(void) {
  * @brief Loop the clock display and update routine.
  */
 void Clock::loop(void) {
-    
-    while(true) {
-        if (set_time_from_rtc()) {
-            //server_log("Data: %lu-%lu-%lu", year, month, day);
-            //server_log("Time: %lu:%lu:%lu", hour, minutes, seconds);
-            uint32_t display_hour = hour;
-            
-            // Update display hour for DST, if allowed
-            if (prefs.bst && is_bst()) display_hour = (display_hour + 1) % 24;
-            bool is_pm = (display_hour > 11);
-            
-            // Calculate and set the hours digits
-            if (!prefs.mode) {
-                if (is_pm) display_hour -= 12;
-                if (display_hour == 0) display_hour = 12;
-            }
-            
-            // Display the hour
-            // The decimal point by the first digit is used to indicate connection status
-            // (lit if the clock is disconnected)
-            uint32_t decimal = bcd(display_hour);
-            display.set_number(decimal & 0x0F, 1, false);
-            if (!prefs.mode && display_hour < 10) {
-                display.set_glyph(0, 0, false);
+
+    while (true) {
+        // Check the time
+        set_time_from_rtc();
+
+        // Update display hour for DST, if allowed
+        uint32_t display_hour = hour;
+        if (prefs.bst && is_bst()) display_hour = (display_hour + 1) % 24;
+        bool is_pm = (display_hour > 11);
+
+        // Calculate and set the hours digits
+        if (!prefs.mode) {
+            if (is_pm) display_hour -= 12;
+            if (display_hour == 0) display_hour = 12;
+        }
+
+        // Display the hour
+        // The decimal point by the first digit is used to indicate connection status
+        // (lit if the clock is disconnected)
+        uint32_t decimal = bcd(display_hour);
+        display.set_number(decimal & 0x0F, 1, false);
+        if (!prefs.mode && display_hour < 10) {
+            display.set_glyph(0, 0, false);
+        } else {
+            display.set_number(decimal >> 4, 0, false);
+        }
+
+        // Display the minute
+        // The decimal point by the last digit is used to indicate AM/PM,
+        // but only for the 12-hour clock mode (mode == False)
+        decimal = bcd(minutes);
+        display.set_number(decimal >> 4, 2, false);
+        display.set_number(decimal & 0x0F, 3, (prefs.mode ? false : is_pm));
+
+        // Set the colon and present the display
+        if (prefs.colon) {
+            if (prefs.flash) {
+                display.set_colon(seconds % 2 == 0);
+                HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, seconds % 2 == 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
             } else {
-                display.set_number(decimal >> 4, 0, false);
+                display.set_colon(prefs.colon);
             }
-            
-            // Display the minute
-            // The decimal point by the last digit is used to indicate AM/PM,
-            // but only for the 12-hour clock mode (mode == False)
-            decimal = bcd(minutes);
-            display.set_number(decimal >> 4, 2, false);
-            display.set_number(decimal & 0x0F, 3, (prefs.mode ? false : is_pm));
-            
-            // Set the colon and present the display
-            if (prefs.colon) {
-                if (prefs.flash) {
-                    display.set_colon(seconds % 2 == 0);
-                } else {
-                    display.set_colon(prefs.colon);
-                }
-            }
-            
-            display.draw();
+        }
+
+        display.draw();
+
+        // Reload prefs if we haven't done so yet
+        if (!received_prefs && (minutes % 2 == 0)) {
+            received_prefs = Config::get_prefs(prefs);
+            if (received_prefs) server_log("Clock settings retrieved");
         }
     }
 }
@@ -143,6 +152,8 @@ bool Clock::is_bst(void) {
 
 /**
  * @brief Are we in daylight savings time?
+ *        This assumes the clock is in the UK, but could
+ *        easily be adapted for other locations.
  *
  * @returns `true` if DST is active, otherwise `false`.
  */

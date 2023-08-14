@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 # Set project name
-set(PROJECT_NAME "mv-clock-demo")
+set(PROJECT_NAME "microvisor-cpp-clock-demo")
 
 # Set to 0 to build without remote debugging enabled
 set(ENABLE_REMOTE_DEBUGGING 1)

@@ -3,7 +3,7 @@
  *
  * @version     1.0.0
  * @author      Tony Smith
- * @copyright   2023
+ * @copyright   2023, KORE Wireless
  * @licence     MIT
  *
  */
@@ -11,8 +11,6 @@
 
 
 using std::string;
-
-
 
 
 /**

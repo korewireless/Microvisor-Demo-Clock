@@ -3,7 +3,7 @@
  *
  * @version     1.0.0
  * @author      Tony Smith
- * @copyright   2023
+ * @copyright   2023, KORE Wireless
  * @licence     MIT
  *
  */
@@ -35,7 +35,7 @@
 #include "config.h"
 #include "logging.h"
 #include "uart_logging.h"
-#include "ArduinoJson-v6.18.3.h"
+#include "ArduinoJson-v6.21.3.h"
 
 
 using std::vector;
@@ -52,12 +52,10 @@ using std::stringstream;
 #define     LED_FLASH_PERIOD_MS         1000
 
 
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 
 #ifdef __cplusplus

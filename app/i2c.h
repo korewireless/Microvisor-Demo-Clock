@@ -22,8 +22,8 @@
  */
 namespace I2C {
     
-    void        setup(void);
-    bool        check(uint8_t addr);
+    void        setup(uint32_t address);
+    bool        check(uint32_t address);
     void        write_byte(uint8_t address, uint8_t byte);
     void        write_block(uint8_t address, uint8_t *data, uint8_t count);
 }

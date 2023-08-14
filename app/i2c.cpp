@@ -18,6 +18,16 @@ extern      I2C_HandleTypeDef   i2c;
 extern      bool                do_use_i2c;
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+// Required on STM32 HAL callouts implemented in C++
+void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c);
+#ifdef __cplusplus
+}
+#endif
+
+
 namespace I2C {
 
 /**
@@ -25,7 +35,7 @@ namespace I2C {
  *
  * Takes values from #defines set in `i2c.h`
  */
-void setup(void) {
+void setup(uint32_t target_i2c_address) {
     
     // I2C1 pins are:
     //   SDA -> PB9
@@ -46,24 +56,24 @@ void setup(void) {
         return;
     }
 
-    // Check peripheral readiness
-    do_use_i2c = check(HT16K33_ADDRESS);
+    // I2C is up, so check peripheral readiness
+    do_use_i2c = check(target_i2c_address);
 }
 
 
 /**
  * @brief Check for presence of a known device by its I2C address.
  *
- * @param addr: The device's address.
+ * @param address: The device's address.
  *
  * @returns `true` if the device is present, otherwise `false`.
  */
-bool check(uint8_t addr) {
+bool check(uint32_t address) {
     
     uint8_t timeout_count = 0;
 
     while(true) {
-        HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(&i2c, addr << 1, 1, 100);
+        HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(&i2c, (uint8_t)address << 1, 1, 100);
         if (status == HAL_OK) {
             return true;
         } else {

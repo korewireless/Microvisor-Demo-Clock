@@ -3,7 +3,7 @@
  *
  * @version     1.0.0
  * @author      Tony Smith
- * @copyright   2023
+ * @copyright   2023, KORE Wireless
  * @licence     MIT
  *
  */
@@ -24,7 +24,7 @@ class Clock {
     
     public:
         // Constructor
-        Clock(Prefs& in_prefs, HT16K33_Segment& in_display);
+        Clock(Prefs& in_prefs, HT16K33_Segment& in_display, bool got_prefs);
         
         bool                set_time_from_rtc(void);
         void                loop(void);
@@ -47,6 +47,7 @@ class Clock {
     
         Prefs               prefs;
         HT16K33_Segment     display;
+        bool                received_prefs;
 };
 
 

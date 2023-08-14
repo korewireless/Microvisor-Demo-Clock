@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.14)
 
 # Set application data
 set(APP "Microvisor Clock Demo")
-set(VERSION_NUMBER "1.0.1")
-set(BUILD_NUMBER "243")
+set(VERSION_NUMBER "0.1.0")
+set(BUILD_NUMBER "273")
 
 message("Building ${APP} ${VERSION_NUMBER} build ${BUILD_NUMBER}")
 
@@ -23,7 +23,7 @@ add_executable(${PROJECT_NAME}
     stm32u5xx_hal_timebase_tim_template.c
 )
 
-#set_target_properties(${PROJECT_NAME} PROPERTIES LINK_OPTIONS -Wstack-usage=32768)
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_OPTIONS -Wstack-usage=32768)
 
 # Link built libraries
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC
@@ -32,8 +32,6 @@ target_link_libraries(${PROJECT_NAME} LINK_PUBLIC
 )
 
 # Optional informational and additional format generation
-# NOTE From 2.0.3, this generates an alternative .bin file
-#      than was previously the case
 add_custom_command(OUTPUT EXTRA_FILES DEPENDS ${PROJECT_NAME}
     COMMAND mv "${PROJECT_NAME}" "${PROJECT_NAME}.elf"
     COMMAND ${CMAKE_SIZE} --format=berkeley "${PROJECT_NAME}.elf"
