@@ -11,20 +11,20 @@ The application also makes use of Microvisor's system calls to retrieve a pre-lo
 The settings payload is a JSON object:
 
 ```json
-{ "mode": false, 
-  "bst": true, 
-  "brightness": 4, 
-  "colon": true, 
+{ "mode": false,
+  "bst": true,
+  "brightness": 4,
+  "colon": true,
   "flash": false }
 ```
 
-The *mode* value is `true` for a 24-hour clock, `false` for a 12-hour AM/PM view. PM time is indicated by ligting the display’s rightmost decimal point. 
+The *mode* value is `true` for a 24-hour clock, `false` for a 12-hour AM/PM view. PM time is indicated by ligting the display’s rightmost decimal point.
 
 The value *bst* is `true` if you wish the clock to observe [daylight savings time]() when it applies.
 
 Set *brightness* to a value between 1 and 15 — this is the display brightness.
 
-The values of *colon* and *flash* are closely related. The former is `true` if you would like the display’s center colon to be illumnated. If it is, setting *flash* to `true` will cause the colon symbol to turn on and off every second. The board’s user LED will flash in time.
+The values of *colon* and *flash* are closely related. The former is `true` if you would like the display’s center colon to be illuminated. If it is, setting *flash* to `true` will cause the colon symbol to turn on and off every second. The board’s user LED will flash in time.
 
 To upload your settings object, use the Microvisor API:
 
@@ -33,7 +33,7 @@ curl -X POST "https://microvisor.twilio.com/v1/Devices/${MV_DEVICE_SID}/Configs"
     --data-urlencode "Key=prefs" \
     --data-urlencode "Value={\"mode\": false,\"bst\": true,\"brightness\": 4,\"colon\": true,\"flash\": false}" \
     -u ${TWILIO_ACCOUNT_SID}:{$TWILIO_AUTH_TOKEN}
-``` 
+```
 
 Each Config is a key:value pair which your application code can access. The key is `prefs`. Once uploaed, this Config can be retrieved by the application, which uses the [ArdunioJson library](https://arduinojson.org/) to validate and parse the Config’s JSON content.
 
@@ -47,6 +47,18 @@ extern "C" void TIM8_BRK_IRQHandler(void);
 #endif
 ```
 
+## Hardware
+
+Adafruit offers an [inexpensive HT16K33-based display breakout](https://www.adafruit.com/product/878) which you can connect to your Nucleo as follows. CN12 is the right-had GPIO header (with the POWER connector at the top) and CN 11 is on the left (see [Nucleo Getting Started Guide](https://www.twilio.com/docs/iot/microvisor/get-started-with-microvisor#get-to-know-your-board) for details).
+
+| Breakout Pin | Nucleo Pin |
+| :--: | :--: |
+| SCL | CN12 17 |
+| SDA | CN12 5 |
+| GND | CN12 71 |
+| VCC | CN11 5 |
+
+**Note** GND can be connected to any GND pin.
 
 ## License
 

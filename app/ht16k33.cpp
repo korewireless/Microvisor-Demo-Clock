@@ -1,7 +1,7 @@
 /*
  * cellular::ht16k33_driver for Raspberry Pi Pico
  *
- * @version     1.0.0
+ * @version     0.1.0
  * @author      Tony Smith
  * @copyright   2023, KORE Wireless
  * @licence     MIT
@@ -18,13 +18,13 @@ using std::string;
  *
  * @param address: The display's I2C address. Default: 0x70.
  */
-HT16K33_Segment::HT16K33_Segment(uint32_t address) 
+HT16K33_Segment::HT16K33_Segment(uint32_t address)
 
     :CHARSET{0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F,
              0x6F, 0x5F, 0x7C, 0x58, 0x5E, 0x7B, 0x71, 0x40, 0x63},
      POS{0, 2, 6, 8}
 {
-    
+
     if (address == 0x00 || address > 0x7F) address = HT16K33_ADDRESS;
     i2c_addr = address;
 }
@@ -35,7 +35,7 @@ HT16K33_Segment::HT16K33_Segment(uint32_t address)
  *        and set basic parameters.
  */
 void HT16K33_Segment::init(uint32_t brightness) {
-    
+
     power_on(true);
     set_brightness(brightness);
     clear();
@@ -50,7 +50,7 @@ void HT16K33_Segment::init(uint32_t brightness) {
               Default: `true`.
  */
 void HT16K33_Segment::power_on(bool on) {
-    
+
     I2C::write_byte(i2c_addr, on ? HT16K33_GENERIC_SYSTEM_ON : HT16K33_GENERIC_DISPLAY_OFF);
     I2C::write_byte(i2c_addr, on ? HT16K33_GENERIC_DISPLAY_ON : HT16K33_GENERIC_SYSTEM_OFF);
 }
@@ -62,7 +62,7 @@ void HT16K33_Segment::power_on(bool on) {
  * @param brightness: A value from 0 to 15. Default: 15.
  */
 void HT16K33_Segment::set_brightness(uint32_t brightness) {
-    
+
     if (brightness > 15) brightness = 15;
     I2C::write_byte(i2c_addr, HT16K33_GENERIC_CMD_BRIGHTNESS | brightness);
 }
@@ -74,7 +74,7 @@ void HT16K33_Segment::set_brightness(uint32_t brightness) {
  * @retval The instance.
  */
 HT16K33_Segment& HT16K33_Segment::clear() {
-    
+
     memset(buffer, 0x00, 16);
     return *this;
 }
@@ -87,7 +87,7 @@ HT16K33_Segment& HT16K33_Segment::clear() {
  * @retval The instance.
  */
 HT16K33_Segment& HT16K33_Segment::set_colon(bool is_set) {
-    
+
     buffer[HT16K33_SEGMENT_COLON_ROW] = is_set ? 0x02 : 0x00;
     return *this;
 }
@@ -104,7 +104,7 @@ HT16K33_Segment& HT16K33_Segment::set_colon(bool is_set) {
  * @retval The instance.
  */
 HT16K33_Segment& HT16K33_Segment::set_glyph(uint32_t glyph, uint32_t digit, bool has_dot) {
-    
+
     if (digit > 4) return *this;
     if (glyph > 0xFF) return *this;
     buffer[HT16K33_Segment::POS[digit]] = glyph;
@@ -124,7 +124,7 @@ HT16K33_Segment& HT16K33_Segment::set_glyph(uint32_t glyph, uint32_t digit, bool
  * @retval The instance.
  */
 HT16K33_Segment& HT16K33_Segment::set_number(uint32_t number, uint32_t digit, bool has_dot) {
-    
+
     if (digit > 4) return *this;
     if (number > 9) return *this;
     return set_alpha('0' + number, digit, has_dot);
@@ -142,7 +142,7 @@ HT16K33_Segment& HT16K33_Segment::set_number(uint32_t number, uint32_t digit, bo
  * @retval The instance.
  */
 HT16K33_Segment& HT16K33_Segment::set_alpha(char chr, uint32_t digit, bool has_dot) {
-    
+
     if (digit > 4) return *this;
 
     uint8_t char_val = 0xFF;
@@ -169,7 +169,7 @@ HT16K33_Segment& HT16K33_Segment::set_alpha(char chr, uint32_t digit, bool has_d
  * @brief Write the display buffer out to I2C.
  */
 void HT16K33_Segment::draw() {
-    
+
     // Set up the buffer holding the data to be
     // transmitted to the LED
     uint8_t tx_buffer[17] = {0};

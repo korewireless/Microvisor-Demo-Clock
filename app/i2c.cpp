@@ -1,7 +1,7 @@
 /*
  * cellular::i2c_utils for Raspberry Pi Pico
  *
- * @version     1.0.0
+ * @version     0.1.0
  * @author      smittytone
  * @copyright   2021
  * @licence     MIT
@@ -36,7 +36,7 @@ namespace I2C {
  * Takes values from #defines set in `i2c.h`
  */
 void setup(uint32_t target_i2c_address) {
-    
+
     // I2C1 pins are:
     //   SDA -> PB9
     //   SCL -> PB6
@@ -69,7 +69,7 @@ void setup(uint32_t target_i2c_address) {
  * @returns `true` if the device is present, otherwise `false`.
  */
 bool check(uint32_t address) {
-    
+
     uint8_t timeout_count = 0;
 
     while(true) {
@@ -104,7 +104,7 @@ bool check(uint32_t address) {
  * @param byte:    The byte to send.
  */
 void write_byte(uint8_t address, uint8_t byte) {
-    
+
     HAL_I2C_Master_Transmit(&i2c, address << 1, &byte, 1, 100);
 }
 
@@ -116,7 +116,7 @@ void write_byte(uint8_t address, uint8_t byte) {
  * @param byte:    The byte to send.
  */
 void write_block(uint8_t address, uint8_t *data, uint8_t count) {
-    
+
     HAL_I2C_Master_Transmit(&i2c, address << 1, data, count, 100);
 }
 
@@ -130,7 +130,7 @@ void write_block(uint8_t address, uint8_t *data, uint8_t count) {
  * @param i2c: A HAL I2C_HandleTypeDef pointer to the I2C instance.
  */
 void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c) {
-    
+
     // This SDK-named function is called by HAL_I2C_Init()
 
     // Configure U5 peripheral clock

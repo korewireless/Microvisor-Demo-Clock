@@ -1,7 +1,7 @@
 /*
  * Microvisor Clock Demo -- main file
  *
- * @version     1.0.0
+ * @version     0.1.0
  * @author      Tony Smith
  * @copyright   2023, KORE Wireless
  * @licence     MIT
@@ -54,7 +54,7 @@ class HT16K33_Segment {
         // Following are populated in the constructor
         const uint8_t       CHARSET[18];
         const uint8_t       POS[4];
-        
+
         /*
         // The key alphanumeric characters we can show:
         // 0-9, A-F, minus, degree

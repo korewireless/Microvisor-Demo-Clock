@@ -1,7 +1,7 @@
 /*
  * cellular::i2c
  *
- * @version     1.0.0
+ * @version     0.1.0
  * @author      smittytone
  * @copyright   2021
  * @licence     MIT
@@ -21,7 +21,7 @@
  * PROTOTYPES
  */
 namespace I2C {
-    
+
     void        setup(uint32_t address);
     bool        check(uint32_t address);
     void        write_byte(uint8_t address, uint8_t byte);

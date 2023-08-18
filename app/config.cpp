@@ -1,7 +1,7 @@
 /*
  * Config
  *
- * @version     1.0.0
+ * @version     0.1.0
  * @author      smittytone
  * @copyright   2021
  * @licence     MIT
@@ -36,10 +36,10 @@ static          Handles         handles = { 0, 0, 0 };
 namespace Config {
 
 bool get_prefs(Prefs& prefs) {
-    
+
     // Check for a valid channel handle
     if (!Channel::open()) return false;
-    
+
     // Set up the request parameters
     MvConfigKeyToFetch key_one;
     key_one.scope = MV_CONFIGKEYFETCHSCOPE_DEVICE;     // A device-level value
@@ -48,15 +48,15 @@ bool get_prefs(Prefs& prefs) {
         .data = (uint8_t*)"prefs",
         .length = 5
     };
-    
+
     uint32_t item_count = 1;
     MvConfigKeyToFetch keys[item_count];
     keys[0] = key_one;
-    
+
     MvConfigKeyFetchParams request;
     request.num_items = item_count;
     request.keys_to_fetch = keys;
-    
+
     enum MvStatus status = mvSendConfigFetchRequest(handles.channel, &request);
     if (status != MV_STATUS_OKAY) {
         server_error("Could not issue config fetch request");
@@ -73,7 +73,7 @@ bool get_prefs(Prefs& prefs) {
         // Break out after timeout or successful config retrieval
         if (received_config || (HAL_GetTick() - start_tick > CONFIG_WAIT_PERIOD_MS)) break;
     }
-    
+
     if (!received_config) {
         // Request timed out
         server_error("Config fetch request timed out");
@@ -86,14 +86,14 @@ bool get_prefs(Prefs& prefs) {
     MvConfigResponseData response;
     response.result = (MvConfigFetchResult)0;
     response.num_items = 0;
-    
+
     status = mvReadConfigFetchResponseData(handles.channel, &response);
     if (status != MV_STATUS_OKAY || response.result != MV_CONFIGFETCHRESULT_OK || response.num_items != item_count) {
         server_error("Could not get config item (status: %i; result: %i)", status, response.result);
         Channel::close();
         return false;
     }
-    
+
     uint8_t value[513] = {0};
     uint32_t value_length = 0;
     enum MvConfigKeyFetchResult result = (MvConfigKeyFetchResult)0;
@@ -114,7 +114,7 @@ bool get_prefs(Prefs& prefs) {
         Channel::close();
         return false;
     }
-    
+
     server_log("Received: %s", value);
 
     // Copy the value data to the requested location
@@ -127,7 +127,7 @@ bool get_prefs(Prefs& prefs) {
         //prefs.flash         = (bool)settings["flash"];
         prefs.brightness    = (uint32_t)settings["brightness"];
     }
-    
+
     Channel::close();
     return true;
 }
@@ -141,16 +141,16 @@ namespace Channel {
  * @returns `true` if the channel is open, otherwise `false`.
  */
 bool open(void) {
-    
+
     // Set up the HTTP channel's multi-use send and receive buffers
     static volatile uint8_t config_rx_buffer[CONFIG_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
     static volatile uint8_t config_tx_buffer[CONFIG_TX_BUFFER_SIZE_B] __attribute__((aligned(512)));
-    
+
     if (handles.channel == 0) {
         // No network connection yet? Then establish one
         Network::open();
         if (handles.network == 0) return false;
-        
+
         // Get the network channel handle.
         // NOTE This is set in `logging.c` which puts the network in place
         //      (ie. so the network handle != 0) well in advance of this being called
@@ -171,7 +171,7 @@ bool open(void) {
                 .length = 0
             }
         };
-        
+
         // Ask Microvisor to open the channel
         // and confirm that it has accepted the request
         enum MvStatus status = mvOpenChannel(&channel_config, &handles.channel);
@@ -180,7 +180,7 @@ bool open(void) {
             return false;
         }
     }
-    
+
     server_log("Config Channel handle: %lu", handles.channel);
     return true;
 }
@@ -190,7 +190,7 @@ bool open(void) {
  * @brief Close the currently open HTTP channel.
  */
 void close(void) {
-    
+
     // If we have a valid channel handle -- ie. it is non-zero --
     // then ask Microvisor to close it and confirm acceptance of
     // the closure request.
@@ -212,12 +212,12 @@ void close(void) {
 namespace Network {
 
 void open(void) {
-    
+
     // Configure the network's notification center,
     // but bail if it fails
     setup_notification_center();
     if (handles.notification == 0) return;
-    
+
     // Check if we need to establish a network
     if (handles.network == 0) {
         // Configure the network connection request
@@ -227,7 +227,7 @@ void open(void) {
             .notification_handle = handles.notification,
             .notification_tag = USER_TAG_LOGGING_REQUEST_NETWORK,
         };
-        
+
         // Ask Microvisor to establish the network connection
         // and confirm that it has accepted the request
         mvRequestNetwork(&network_config, &handles.network);
@@ -250,7 +250,7 @@ void open(void) {
             }
         }
     }
-    
+
     server_log("Network handle: %lu", handles.network);
 }
 
@@ -259,7 +259,7 @@ void open(void) {
  * @brief Configure the network Notification Center.
  */
 void setup_notification_center(void) {
-    
+
     if (handles.notification == 0) {
         // Clear the notification store
         memset((void *)notification_center, 0xff, sizeof(notification_center));
@@ -287,11 +287,11 @@ void setup_notification_center(void) {
             handles.notification = 0;
         }
     }
-    
+
     server_log("Notification Center handle: %lu", handles.notification);
 }
 
- 
+
 }   // Namespace Network
 
 
@@ -307,7 +307,7 @@ void setup_notification_center(void) {
  * HTTP requests, so we use tags to determine the source channel.
  */
 void TIM8_BRK_IRQHandler(void) {
-    
+
     // Check for readable data in the HTTP channel
     //HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_SET);
     bool got_notification = false;
@@ -322,13 +322,13 @@ void TIM8_BRK_IRQHandler(void) {
                 received_config = true;
                 got_notification = true;
             }
-            
+
             break;
         // Others
         default:
             break;
     }
-    
+
     // We had a relevant notification
     if (got_notification) {
         // Point to the next record to be written

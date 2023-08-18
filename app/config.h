@@ -1,7 +1,7 @@
 /*
  * Config
  *
- * @version     1.0.0
+ * @version     0.1.0
  * @author      smittytone
  * @copyright   2021
  * @licence     MIT
@@ -39,7 +39,7 @@ typedef struct {
  * PROTOTYPES
  */
 namespace Config {
-    
+
     namespace Channel {
         bool    open(void);
         void    close(void);

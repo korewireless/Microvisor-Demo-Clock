@@ -1,7 +1,7 @@
 /*
  * Microvisor Clock Demo -- Clock class
  *
- * @version     1.0.0
+ * @version     0.1.0
  * @author      Tony Smith
  * @copyright   2023, KORE Wireless
  * @licence     MIT
@@ -40,14 +40,14 @@ Clock::Clock(Prefs& in_prefs, HT16K33_Segment& in_display, bool got_prefs)
  * @returns `true` if the time was set, otherwise `false`.
  */
 bool Clock::set_time_from_rtc(void) {
-    
+
     static char timestamp[65] = {0};
     uint64_t usec = 0;
-    
+
     if (mvGetWallTime(&usec) == MV_STATUS_OKAY) {
         // Get the time in seconds
         time_t secs = (time_t)usec / 1000000;
-        
+
         // Write time string as "2022-05-10 13:30:58"
         strftime(timestamp, 48, "%F %T", gmtime(&secs));
 
@@ -55,7 +55,7 @@ bool Clock::set_time_from_rtc(void) {
         sscanf(timestamp, "%lu-%lu-%lu %lu:%lu:%lu", &year, &month, &day, &hour, &minutes, &seconds);
         return true;
     }
-    
+
     return false;
 }
 
@@ -134,7 +134,7 @@ uint32_t Clock::bcd(uint32_t raw_int) {
         if ((raw_int & 0x0F00) > 0x04FF) raw_int += 0x0300;
         if ((raw_int & 0xF000) > 0x4FFF) raw_int += 0x3000;
     }
-    
+
     return (raw_int >> 8) & 0xFF;
 }
 
@@ -145,7 +145,7 @@ uint32_t Clock::bcd(uint32_t raw_int) {
  * @returns `true` if DST is active, otherwise `false`.
  */
 bool Clock::is_bst(void) {
-    
+
     return bst_check();
 }
 
@@ -158,7 +158,7 @@ bool Clock::is_bst(void) {
  * @returns `true` if DST is active, otherwise `false`.
  */
 bool Clock::bst_check(void) {
-    
+
     if (month > 3 and month < 10) return true;
 
     if (month == 3) {
@@ -167,14 +167,14 @@ bool Clock::bst_check(void) {
             if ((day_of_week(i, 3, (int)year) == 0) && (day >= (uint32_t)i)) return true;
         }
     }
-    
+
     if (month == 10) {
         // BST ends on the last Sunday of October
         for (int i = 31 ; i > 24 ; --i) {
             if ((day_of_week(i, 10, (int)year) == 0) && (day < (uint32_t)i)) return true;
         }
     }
-    
+
     return false;
 }
 
@@ -190,13 +190,13 @@ bool Clock::bst_check(void) {
  * @returns The day of the week: 0 (Monday) to 6 (Sunday).
  */
 uint32_t Clock::day_of_week(int a_day, int a_month, int a_year) {
-    
+
     a_month -= 2;
     if (a_month < 1) a_month += 12;
     uint32_t century = (int)(a_year / 100);
     a_year -= (century * 100);
     a_year -= (month > 10 ? 1 : 0);
-    
+
     int dow = a_day + (int)((13 * a_month - 1) / 5) + a_year + (int)(year / 4) + (int)(century / 4) - (2 * century);
     dow %= 7;
     if (dow < 0) dow += 7;
@@ -212,7 +212,7 @@ uint32_t Clock::day_of_week(int a_day, int a_month, int a_year) {
  * @returns `true` if the year is a leap year, otherwise `false`.
  */
 bool Clock::is_leap_year(uint32_t a_year) {
-    
+
     if ((a_year % 4 == 0) && ((a_year % 100 > 0 || a_year % 400 == 0))) return true;
     return false;
 }

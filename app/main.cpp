@@ -1,7 +1,7 @@
 /*
  * Microvisor Clock Demo -- main file
  *
- * @version     1.0.0
+ * @version     0.1.0
  * @author      Tony Smith
  * @copyright   2023, KORE Wireless
  * @licence     MIT
@@ -38,7 +38,7 @@ bool do_use_i2c = false;
  * @returns The clock value.
  */
 uint32_t SECURE_SystemCoreClockUpdate() {
-    
+
     uint32_t clock = 0;
     mvGetHClk(&clock);
     return clock;
@@ -49,7 +49,7 @@ uint32_t SECURE_SystemCoreClockUpdate() {
  * @brief System clock configuration.
  */
 void system_clock_config(void) {
-    
+
     SystemCoreClockUpdate();
     HAL_InitTick(TICK_INT_PRIORITY);
 }
@@ -63,7 +63,7 @@ void system_clock_config(void) {
  * LIS3DH motion sensor.
  */
 static void setup_gpio(void) {
-    
+
     // Enable GPIO port clock
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
@@ -84,7 +84,7 @@ static void setup_gpio(void) {
  * @brief Initialise the modem power pin.
  */
 static void setup_i2c(void) {
-    
+
     // Initialize the I2C bus for the display and sensor
     I2C::setup(HT16K33_ADDRESS);
 }
@@ -94,7 +94,7 @@ static void setup_i2c(void) {
  * @brief Show basic device info.
  */
 static void log_device_info(void) {
-    
+
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
     server_log("Device: %s", buffer);
@@ -114,26 +114,26 @@ int main() {
 
     // Configure the system clock
     system_clock_config();
-    
+
     // Set up the hardware
     setup_gpio();
     setup_i2c();
-    
+
     // Instantiate the display driver
     HT16K33_Segment display = HT16K33_Segment(HT16K33_ADDRESS);
     display.init();
-    
+
     // Create a preferencs store and
     // set the defaults
     Prefs prefs;
     set_defaults(prefs);
-    
+
     // Display SYNC while we wait for the RTC to be set
     uint8_t sync[4] = {0x6D, 0x6E, 0x37, 0x39};
     display.init(prefs.brightness);
     for (uint32_t i = 0 ; i < 4 ; ++i) display.set_glyph(sync[i], i, false);
     display.draw();
-    
+
     // Open the network
     // NOTE Do this before calling `log_device_info()`
     Config::Network::open();
@@ -148,7 +148,7 @@ int main() {
     } else {
         server_error("Clock settings not yet retrieved");
     }
-    
+
     // Instantiate a Clock object and run it
     Clock mvclock = Clock(prefs, display, got_prefs);
     mvclock.loop();
@@ -164,7 +164,7 @@ int main() {
  * @param settings: Reference to the app's Prefs.
  */
 static inline void set_defaults(Prefs& settings) {
-    
+
     settings.mode = false;
     settings.bst = true;
     settings.colon = true;
