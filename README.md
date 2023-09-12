@@ -32,7 +32,7 @@ To upload your settings object, use the Microvisor API:
 curl -X POST "https://microvisor.twilio.com/v1/Devices/${MV_DEVICE_SID}/Configs" \
     --data-urlencode "Key=prefs" \
     --data-urlencode "Value={\"mode\": false,\"bst\": true,\"brightness\": 4,\"colon\": true,\"flash\": false}" \
-    -u ${TWILIO_ACCOUNT_SID}:{$TWILIO_AUTH_TOKEN}
+    -u ${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}
 ```
 
 Each Config is a key:value pair which your application code can access. The key is `prefs`. Once uploaed, this Config can be retrieved by the application, which uses the [ArdunioJson library](https://arduinojson.org/) to validate and parse the Config’s JSON content.
