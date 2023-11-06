@@ -150,17 +150,6 @@ bool Clock::is_bst(void) {
 
 
 /**
- * @brief Are we in US daylight savings time?
- *
- * @returns `true` if DST is active, otherwise `false`.
- */
-bool Clock::is_dst(void) {
-
-    return dst_check();
-}
-
-
-/**
  * @brief Are we in UK daylight savings time?
  *
  * @returns `true` if DST is active, otherwise `false`.
@@ -180,38 +169,6 @@ bool Clock::bst_check(void) {
         // BST ends on the last Sunday of October
         for (uint32_t i = 31 ; i > 24 ; --i) {
             if ((day_of_week(i, 10, (int)year) == 0) && (day < i)) return true;
-        }
-    }
-
-    return false;
-}
-
-
-/**
- * @brief Are we in US daylight savings time?
- *        This could easily be adapted for other locations.
- *
- * @returns `true` if DST is active, otherwise `false`.
- */
-bool Clock::bst_check(void) {
-
-    if (month > 3 and month < 11) return true;
-
-    if (month == 3) {
-        // BST starts on the second Sunday of March
-        int count = 0;
-        for (uint32_t i = 1 ; i <= 31 ; ++i) {
-            if (day_of_week(i, 3, (int)year) == 0) {
-                count++;
-                if (count == 2 && day < i) return true
-            }
-        }
-    }
-
-    if (month == 11) {
-        // BST ends on the first Sunday of November
-        for (uint32_t i = 1 ; i <= 31 ; ++i) {
-            if ((day_of_week(i, 11, (int)year) == 0) && (day < i)) return true;
         }
     }
 
