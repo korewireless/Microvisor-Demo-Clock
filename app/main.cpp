@@ -11,11 +11,6 @@
 #include "app_version.h"
 
 
-using std::vector;
-using std::string;
-using std::vector;
-
-
 /*
  * STATIC PROTOTYPES
  */

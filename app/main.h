@@ -14,7 +14,6 @@
 /*
  * INCLUDES
  */
-#include <iostream>
 #include <string>
 #include <vector>
 #include <cstdlib>
@@ -38,29 +37,12 @@
 #include "ArduinoJson-v6.21.3.h"
 
 
-using std::vector;
-using std::string;
-using std::vector;
-using std::stringstream;
-
-
 /*
  * CONSTANTS
  */
 #define     LED_GPIO_BANK               GPIOA
 #define     LED_GPIO_PIN                GPIO_PIN_5
 #define     LED_FLASH_PERIOD_MS         1000
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-
-#ifdef __cplusplus
-}           // extern "C"
-#endif
 
 
 #endif      // MAIN_H
