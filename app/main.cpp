@@ -139,7 +139,7 @@ int main() {
     setDefaults(prefs);
 
     // Display SYNC while we wait for the RTC to be set
-    uint8_t sync[4] = {0x6D, 0x6E, 0x37, 0x39};
+    const uint8_t sync[4] = {0x6D, 0x6E, 0x37, 0x39};
     display.init(prefs.brightness);
     for (uint32_t i = 0 ; i < 4 ; ++i) display.setGlyph(sync[i], i, false);
     display.draw();
@@ -152,7 +152,7 @@ int main() {
     logDeviceInfo();
 
     // Load in the clock settings
-    bool gotPrefs = Config::getPrefs(prefs);
+    const bool gotPrefs = Config::getPrefs(prefs);
     if (gotPrefs) {
         server_log("Clock settings retrieved");
     } else {

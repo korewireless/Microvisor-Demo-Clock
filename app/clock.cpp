@@ -187,7 +187,7 @@ uint32_t Clock::dayOfWeek(int aDay, int aMonth, int aYear) {
 
     aMonth -= 2;
     if (aMonth < 1) aMonth += 12;
-    uint32_t century = (int)(aYear / 100);
+    const uint32_t century = (int)(aYear / 100);
     aYear -= (century * 100);
     aYear -= (month > 10 ? 1 : 0);
 

@@ -92,7 +92,7 @@ void setup(uint32_t targetAddress) {
         return;
     }
 
-    // I2C is up, so check peripheral readiness
+    // I2C is up, so check peripheral availability
     doUseI2C = check(targetAddress);
 }
 

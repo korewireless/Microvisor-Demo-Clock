@@ -170,7 +170,7 @@ void HT16K33_Segment::draw() {
 
     // Set up the buffer holding the data to be
     // transmitted to the LED
-    uint8_t txBuffer[17] = {0};
+    static uint8_t txBuffer[17] = {0};
 
     // Span the 8 bytes of the graphics buffer
     // across the 16 bytes of the LED's buffer

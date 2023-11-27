@@ -102,7 +102,7 @@ void log_uart_output(const char* buffer) {
     strftime(uart_buffer, 64, "%F %T.XXX ", gmtime(&sec));
     // Insert the millisecond time over the XXX
     sprintf(&uart_buffer[20], "%03u ", (unsigned)(msec % 1000));
-    uint32_t length = strlen(uart_buffer);
+    const uint32_t length = strlen(uart_buffer);
 
     // Write the timestamp to the message
     sprintf(&uart_buffer[length], "%s\n", buffer);

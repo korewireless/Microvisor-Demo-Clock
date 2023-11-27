@@ -49,7 +49,7 @@ bool getPrefs(Prefs& prefs) {
         .length = 5
     };
 
-    uint32_t itemCount = 1;
+    const uint32_t itemCount = 1;
     MvConfigKeyToFetch keys[itemCount];
     keys[0] = keyOne;
 
@@ -67,7 +67,7 @@ bool getPrefs(Prefs& prefs) {
     // Wait for the data to arrive
     server_log("Awaiting params...");
     receivedConfig = false;
-    uint32_t startTick = HAL_GetTick();
+    const uint32_t startTick = HAL_GetTick();
 
     while (true) {
         // Break out after timeout or successful config retrieval
@@ -195,7 +195,7 @@ void close(void) {
     // then ask Microvisor to close it and confirm acceptance of
     // the closure request.
     if (handles.channel != 0) {
-        MvChannelHandle oldHandle = handles.channel;
+        const MvChannelHandle oldHandle = handles.channel;
         enum MvStatus status = mvCloseChannel(&handles.channel);
         if (status == MV_STATUS_OKAY) {
             server_log("Config Channel closed (handle %lu)", oldHandle);
@@ -263,12 +263,6 @@ void setupNotificationCenter(void) {
     if (handles.notification == 0) {
         // Clear the notification store
         memset((void *)notificationCenter, 0xff, sizeof(notificationCenter));
-
-        // Configure a notification center for network-centric notifications
-        //MvNotificationSetup notification_config;
-        //notification_config.irq = TIM8_BRK_IRQn,
-        //notification_config.buffer = (MvNotification*)notificationCenter,
-        //notification_config.buffer_size = sizeof(notificationCenter);
 
         static struct MvNotificationSetup notificationConfig = {
             .irq = TIM8_BRK_IRQn,
