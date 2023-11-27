@@ -15,7 +15,7 @@
  */
 // Defined in `main.cpp`
 extern      I2C_HandleTypeDef   i2c;
-extern      bool                do_use_i2c;
+extern      bool                doUseI2C;
 
 
 #ifdef __cplusplus
@@ -31,11 +31,47 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c);
 namespace I2C {
 
 /**
+ * @brief Check for presence of a known device by its I2C address.
+ *
+ * @param address: The device's address.
+ *
+ * @returns `true` if the device is present, otherwise `false`.
+ */
+static bool check(uint32_t address) {
+
+    uint8_t timeoutCount = 0;
+
+    while(true) {
+        HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(&i2c, (uint8_t)address << 1, 1, 100);
+        if (status == HAL_OK) {
+            return true;
+        } else {
+            uint32_t err = HAL_I2C_GetError(&i2c);
+            server_error("HAL_I2C_IsDeviceReady() : %i", status);
+            server_error("HAL_I2C_GetError():       %li", err);
+        }
+
+        // Flash the LED eight times on device not ready
+        for (uint8_t i = 0 ; i < 8 ; ++i) {
+            HAL_GPIO_TogglePin(LED_GPIO_BANK, LED_GPIO_PIN);
+            HAL_Delay(100);
+        }
+
+        HAL_Delay(1000);
+        timeoutCount++;
+        if (timeoutCount > 10) break;
+    }
+
+    return false;
+}
+
+
+/**
  * @brief Set up the I2C block.
  *
  * Takes values from #defines set in `i2c.h`
  */
-void setup(uint32_t target_i2c_address) {
+void setup(uint32_t targetAddress) {
 
     // I2C1 pins are:
     //   SDA -> PB9
@@ -57,43 +93,7 @@ void setup(uint32_t target_i2c_address) {
     }
 
     // I2C is up, so check peripheral readiness
-    do_use_i2c = check(target_i2c_address);
-}
-
-
-/**
- * @brief Check for presence of a known device by its I2C address.
- *
- * @param address: The device's address.
- *
- * @returns `true` if the device is present, otherwise `false`.
- */
-bool check(uint32_t address) {
-
-    uint8_t timeout_count = 0;
-
-    while(true) {
-        HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(&i2c, (uint8_t)address << 1, 1, 100);
-        if (status == HAL_OK) {
-            return true;
-        } else {
-            uint32_t err = HAL_I2C_GetError(&i2c);
-            server_error("HAL_I2C_IsDeviceReady() : %i", status);
-            server_error("HAL_I2C_GetError():       %li", err);
-        }
-
-        // Flash the LED eight times on device not ready
-        for (uint8_t i = 0 ; i < 8 ; ++i) {
-            HAL_GPIO_TogglePin(LED_GPIO_BANK, LED_GPIO_PIN);
-            HAL_Delay(100);
-        }
-
-        HAL_Delay(1000);
-        timeout_count++;
-        if (timeout_count > 10) break;
-    }
-
-    return false;
+    doUseI2C = check(targetAddress);
 }
 
 
@@ -103,7 +103,7 @@ bool check(uint32_t address) {
  * @param address: The I2C address of the device to write to.
  * @param byte:    The byte to send.
  */
-void write_byte(uint8_t address, uint8_t byte) {
+void writeByte(uint8_t address, uint8_t byte) {
 
     HAL_I2C_Master_Transmit(&i2c, address << 1, &byte, 1, 100);
 }
@@ -115,7 +115,7 @@ void write_byte(uint8_t address, uint8_t byte) {
  * @param address: The I2C address of the device to write to.
  * @param byte:    The byte to send.
  */
-void write_block(uint8_t address, uint8_t *data, uint8_t count) {
+void writeBlock(uint8_t address, uint8_t *data, uint8_t count) {
 
     HAL_I2C_Master_Transmit(&i2c, address << 1, data, count, 100);
 }

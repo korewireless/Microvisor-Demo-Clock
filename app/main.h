@@ -22,12 +22,10 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
-
-// Microvisor includes
+// Microvisor + HAL
 #include "stm32u5xx_hal.h"
 #include "mv_syscalls.h"
-
-// App includes
+// App
 #include "i2c.h"
 #include "ht16k33.h"
 #include "clock.h"
@@ -43,6 +41,8 @@
 #define     LED_GPIO_BANK               GPIOA
 #define     LED_GPIO_PIN                GPIO_PIN_5
 #define     LED_FLASH_PERIOD_MS         1000
+
+#define     I2C_GPIO_BANK               GPIOB
 
 
 #endif      // MAIN_H

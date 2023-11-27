@@ -47,10 +47,10 @@ namespace Config {
 
     namespace Network {
         void    open(void);
-        void    setup_notification_center(void);
+        void    setupNotificationCenter(void);
     }
 
-    bool    get_prefs(Prefs& prefs);
+    bool    getPrefs(Prefs& prefs);
 }
 
 

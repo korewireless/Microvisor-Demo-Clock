@@ -12,20 +12,13 @@
 
 
 /*
- * CONSTANTS
- */
-#define     I2C_GPIO_BANK           GPIOB
-
-
-/*
- * PROTOTYPES
+ * NAMESPACES
  */
 namespace I2C {
 
     void        setup(uint32_t address);
-    bool        check(uint32_t address);
-    void        write_byte(uint8_t address, uint8_t byte);
-    void        write_block(uint8_t address, uint8_t *data, uint8_t count);
+    void        writeByte(uint8_t address, uint8_t byte);
+    void        writeBlock(uint8_t address, uint8_t *data, uint8_t count);
 }
 
 

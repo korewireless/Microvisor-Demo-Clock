@@ -22,19 +22,17 @@
 #include <errno.h>
 #include <time.h>
 #include <assert.h>
-
-// Microvisor includes
+// Microvisor + HAL
 #include "stm32u5xx_hal.h"
 #include "mv_syscalls.h"
-
-// App includes
+// App
 #include "logging.h"
 
 /*
  * CONSTANTS
  */
 #define UART_LOG_TIMESTAMP_MAX_LEN_B        64
-#define UART_LOG_MESSAGE_MAX_LEN_B          64
+#define UART_LOG_MESSAGE_MAX_LEN_B          1024
 
 
 #ifdef __cplusplus
