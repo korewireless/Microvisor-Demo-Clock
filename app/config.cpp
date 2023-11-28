@@ -43,7 +43,7 @@ bool getPrefs(Prefs& prefs) {
     // Set up the request parameters
     MvConfigKeyToFetch keyOne;
     keyOne.scope = MV_CONFIGKEYFETCHSCOPE_DEVICE;     // A device-level value
-    keyOne.store = MV_CONFIGKEYFETCHSTORE_CONFIG;     // A secret value
+    keyOne.store = MV_CONFIGKEYFETCHSTORE_CONFIG;     // A config-type value
     keyOne.key = {
         .data = (uint8_t*)"prefs",
         .length = 5
@@ -89,7 +89,12 @@ bool getPrefs(Prefs& prefs) {
 
     status = mvReadConfigFetchResponseData(handles.channel, &response);
     if (status != MV_STATUS_OKAY || response.result != MV_CONFIGFETCHRESULT_OK || response.num_items != itemCount) {
-        server_error("Could not get config item (status: %i; result: %i)", status, response.result);
+        if (response.result != MV_CONFIGFETCHRESULT_OK || response.num_items != itemCount) {
+            server_error("Please set your config as detailed in the Read Me file");
+        } else {
+            server_error("Could not get config item (status: %i; result: %i)", status, response.result);
+        }
+
         Channel::close();
         return false;
     }

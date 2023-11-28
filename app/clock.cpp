@@ -61,6 +61,8 @@ bool Clock::setTimeFromRTC(void) {
  */
 void Clock::loop(void) {
 
+    const uint32_t configAcquirePeriodMinutes = 4;
+
     while (true) {
         // Check the time
         setTimeFromRTC();
@@ -107,7 +109,8 @@ void Clock::loop(void) {
         display.draw();
 
         // Reload prefs if we haven't done so yet
-        if (!receivedPrefs && (minutes % 2 == 0)) {
+        if (!receivedPrefs && minutes != 0 && minutes % configAcquirePeriodMinutes == 0) {
+            server_log("***");
             receivedPrefs = Config::getPrefs(prefs);
             if (receivedPrefs) server_log("Clock settings retrieved");
         }
