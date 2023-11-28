@@ -99,7 +99,8 @@ bool getPrefs(Prefs& prefs) {
         return false;
     }
 
-    uint8_t value[513] = {0};
+    // Map the extent of `value` to the bytesize of your JSON
+    uint8_t value[257] = {0};
     uint32_t valueLength = 0;
     enum MvConfigKeyFetchResult result = MV_CONFIGKEYFETCHRESULT_OK;
 
@@ -108,7 +109,7 @@ bool getPrefs(Prefs& prefs) {
     item.result = &result;
     item.buf = {
         .data = &value[0],
-        .size = 512,
+        .size = 256,
         .length = &valueLength
     };
 
@@ -122,8 +123,10 @@ bool getPrefs(Prefs& prefs) {
 
     server_log("Received: %s", value);
 
-    // Copy the value data to the requested location
-    DynamicJsonDocument settings(512);
+    // Apple the settings input to the prefs structure
+    // If a key is absent from the JSON, the cast value
+    // defaults to zero/false.
+    DynamicJsonDocument settings(256);
     DeserializationError err = deserializeJson(settings, value);
     if (err == DeserializationError::Ok) {
         prefs.mode          = (bool)settings["mode"];
@@ -131,6 +134,7 @@ bool getPrefs(Prefs& prefs) {
         prefs.colon         = (bool)settings["colon"];
         prefs.flash         = (bool)settings["flash"];
         prefs.brightness    = (uint32_t)settings["brightness"];
+        prefs.led           = (bool)settings["led"];
     }
 
     Channel::close();
@@ -220,8 +224,7 @@ void open(void) {
 
     // Configure the network's notification center,
     // but bail if it fails
-    setupNotificationCenter();
-    if (handles.notification == 0) return;
+    if (!setupNotificationCenter()) return;
 
     // Check if we need to establish a network
     if (handles.network == 0) {
@@ -260,10 +263,20 @@ void open(void) {
 }
 
 
+uint32_t getState(void) {
+
+    if (handles.network == 0) return OFFLINE;
+    MvNetworkStatus netStatus;
+    MvStatus status = mvGetNetworkStatus(handles.network, &netStatus);
+    if (status != MV_STATUS_OKAY) return UNKNOWN;
+    return netStatus;
+}
+
+
 /**
  * @brief Configure the network Notification Center.
  */
-void setupNotificationCenter(void) {
+bool setupNotificationCenter(void) {
 
     if (handles.notification == 0) {
         // Clear the notification store
@@ -284,10 +297,12 @@ void setupNotificationCenter(void) {
             NVIC_EnableIRQ(TIM8_BRK_IRQn);
         } else {
             handles.notification = 0;
+            return false;
         }
     }
 
     server_log("Notification Center handle: %lu", handles.notification);
+    return true;
 }
 
 
@@ -319,6 +334,14 @@ void TIM8_BRK_IRQHandler(void) {
                 // when we're back in the main loop. This lets us exit the ISR quickly.
                 // Do NOT make Microvisor System Calls in the ISR!
                 receivedConfig = true;
+                gotNotification = true;
+            }
+
+            break;
+        case USER_TAG_LOGGING_REQUEST_NETWORK:
+            if (notification.event_type == MV_EVENTTYPE_NETWORKSTATUSCHANGED) {
+                // Change in network status -- don't really need this,
+                // but it clears the notification
                 gotNotification = true;
             }
 

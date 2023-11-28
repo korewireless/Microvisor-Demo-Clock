@@ -95,6 +95,7 @@ static inline void setDefaults(Prefs& settings) {
     settings.bst = true;
     settings.colon = true;
     settings.flash = true;
+    settings.led = false;
     settings.brightness = 4;
 }
 

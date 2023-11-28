@@ -1,9 +1,8 @@
 /*
- * cellular::i2c_utils for Raspberry Pi Pico
+ * Microvisor Clock Demo -- I2C namespace
  *
-
- * @author      smittytone
- * @copyright   2021
+ * @author      Tony Smith
+ * @copyright   2023, KORE Wireless
  * @licence     MIT
  *
  */

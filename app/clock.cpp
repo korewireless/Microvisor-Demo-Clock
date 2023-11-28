@@ -78,14 +78,15 @@ void Clock::loop(void) {
         }
 
         // Display the hour
-        // The decimal point by the first digit is used to indicate connection status
-        // (lit if the clock is disconnected)
+        // The decimal point by the first digit is used to indicate
+        // connection status (lit if the clock is disconnected)
+        uint32_t netState = Config::Network::getState();
         uint32_t decimal = bcd(displayHour);
         display.setNumber(decimal & 0x0F, 1, false);
         if (!prefs.mode && displayHour < 10) {
-            display.setGlyph(0, 0, false);
+            display.setGlyph(0, 0, (netState != ONLINE));
         } else {
-            display.setNumber(decimal >> 4, 0, false);
+            display.setNumber(decimal >> 4, 0, (netState != ONLINE));
         }
 
         // Display the minute
@@ -97,21 +98,29 @@ void Clock::loop(void) {
 
         // Set the colon and present the display
         if (prefs.colon) {
+            // Show the colon, either solid or flash
             if (prefs.flash) {
+                // Show the colon every two seconds, for a second
                 display.setColon(seconds % 2 == 0);
-                HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, seconds % 2 == 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
+                // Flash the NDB LED in sync
+                if (prefs.led) HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, seconds % 2 == 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
             } else {
+                // Illuminate the colon permanently
                 display.setColon(prefs.colon);
             }
         }
 
+        // Tell the display driver to update the LED
         display.draw();
 
         // Reload prefs if we haven't done so yet
         if (!receivedPrefs && minutes != 0 && minutes % configAcquirePeriodMinutes == 0) {
-            server_log("***");
             receivedPrefs = Config::getPrefs(prefs);
-            if (receivedPrefs) server_log("Clock settings retrieved");
+            if (receivedPrefs) {
+                server_log("Clock settings retrieved");
+            } else {
+                server_error("Clock settings not retrieved (%u)", minutes);
+            }
         }
     }
 }

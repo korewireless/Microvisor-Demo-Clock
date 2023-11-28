@@ -15,6 +15,7 @@ typedef struct {
     bool        bst;        // Display according to current daylight savings
     bool        colon;      // Show the colon separator between hours and minutes on the display
     bool        flash;      // Flash the colon separator if it's being shown
+    bool        led;        // Flash the LED in sync with the colon
     uint32_t    brightness; // Display brightness (1-15)
 } Prefs;
 

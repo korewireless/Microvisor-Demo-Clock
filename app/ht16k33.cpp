@@ -1,7 +1,6 @@
 /*
- * cellular::ht16k33_driver for Raspberry Pi Pico
+ * Microvisor Clock Demo -- HT16K33 display driver
  *
-
  * @author      Tony Smith
  * @copyright   2023, KORE Wireless
  * @licence     MIT

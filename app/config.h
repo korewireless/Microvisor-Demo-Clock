@@ -34,19 +34,28 @@ typedef struct {
 } Handles;
 
 
+enum {
+    OFFLINE = 0,
+    ONLINE = 1,
+    CONNECTING = 2,
+    UNKNOWN = 99
+};
+
+
 /*
  * PROTOTYPES
  */
 namespace Config {
 
     namespace Channel {
-        bool    open(void);
-        void    close(void);
+        bool        open(void);
+        void        close(void);
     }
 
     namespace Network {
-        void    open(void);
-        void    setupNotificationCenter(void);
+        void        open(void);
+        bool        setupNotificationCenter(void);
+        uint32_t    getState(void);
     }
 
     bool    getPrefs(Prefs& prefs);
