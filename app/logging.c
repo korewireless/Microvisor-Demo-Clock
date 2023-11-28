@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor Remote Debugging Demo
- * Version 3.0.2
+ *
  * Copyright © 2023, KORE Wireless
  * Licence: Apache 2.0
  *
@@ -37,7 +37,7 @@ static bool uart_available = false;
  * This call will also request a network connection.
  */
 static void log_start(void) {
-    
+
     if (log_state != USER_HANDLE_LOGGING_STARTED) {
         // Initiate the Microvisor logging service
         log_service_setup();
@@ -54,7 +54,7 @@ static void log_start(void) {
  * @brief Initiate Microvisor application logging.
  */
 static void log_service_setup(void) {
-    
+
     // Initialize logging with the standard system call
     enum MvStatus status = mvServerLoggingInit(log_buffer, LOG_BUFFER_SIZE_B);
 
@@ -70,7 +70,7 @@ static void log_service_setup(void) {
  * @param ...           Optional injectable values
  */
 void server_log(const char* format_string, ...) {
-    
+
     if (LOG_DEBUG_MESSAGES) {
         va_list args;
         va_start(args, format_string);
@@ -87,7 +87,7 @@ void server_log(const char* format_string, ...) {
  * @param ...           Optional injectable values
  */
 void server_error(const char* format_string, ...) {
-    
+
     va_list args;
     va_start(args, format_string);
     post_log(true, format_string, args);
@@ -103,7 +103,7 @@ void server_error(const char* format_string, ...) {
  * @param args          va_list of args from previous call
  */
 static void post_log(bool is_err, const char* format_string, va_list args) {
-    
+
     log_start();
     char buffer[LOG_MESSAGE_MAX_LEN_B] = {0};
 

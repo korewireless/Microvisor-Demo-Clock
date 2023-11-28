@@ -1,9 +1,8 @@
 /*
- * cellular::i2c
+ * Microvisor Clock Demo -- I2C namespace
  *
- * @version     0.1.0
- * @author      smittytone
- * @copyright   2021
+ * @author      Tony Smith
+ * @copyright   2023, KORE Wireless
  * @licence     MIT
  *
  */

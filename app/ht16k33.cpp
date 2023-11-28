@@ -1,7 +1,7 @@
 /*
  * cellular::ht16k33_driver for Raspberry Pi Pico
  *
- * @version     0.1.0
+
  * @author      Tony Smith
  * @copyright   2023, KORE Wireless
  * @licence     MIT

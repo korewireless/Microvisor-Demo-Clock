@@ -1,7 +1,6 @@
 /*
- * Config
+ * Microvisor Clock Demo -- Config namespace
  *
- * @version     0.1.0
  * @author      smittytone
  * @copyright   2021
  * @licence     MIT

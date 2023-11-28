@@ -1,7 +1,7 @@
 /*
  * cellular::i2c_utils for Raspberry Pi Pico
  *
- * @version     0.1.0
+
  * @author      smittytone
  * @copyright   2021
  * @licence     MIT

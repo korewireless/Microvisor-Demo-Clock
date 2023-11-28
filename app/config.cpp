@@ -1,7 +1,6 @@
 /*
- * Config
+ * Microvisor Clock Demo -- Config namespace
  *
- * @version     0.1.0
  * @author      smittytone
  * @copyright   2021
  * @licence     MIT
@@ -72,6 +71,7 @@ bool getPrefs(Prefs& prefs) {
     while (true) {
         // Break out after timeout or successful config retrieval
         if (receivedConfig || (HAL_GetTick() - startTick > CONFIG_WAIT_PERIOD_MS)) break;
+        __asm("nop");
     }
 
     if (!receivedConfig) {
@@ -84,7 +84,7 @@ bool getPrefs(Prefs& prefs) {
     // Parse the received data record
     server_log("Received params");
     MvConfigResponseData response;
-    response.result = (MvConfigFetchResult)0;
+    response.result = MV_CONFIGFETCHRESULT_OK;
     response.num_items = 0;
 
     status = mvReadConfigFetchResponseData(handles.channel, &response);
@@ -101,7 +101,7 @@ bool getPrefs(Prefs& prefs) {
 
     uint8_t value[513] = {0};
     uint32_t valueLength = 0;
-    enum MvConfigKeyFetchResult result = (MvConfigKeyFetchResult)0;
+    enum MvConfigKeyFetchResult result = MV_CONFIGKEYFETCHRESULT_OK;
 
     MvConfigResponseReadItemParams item;
     item.item_index = 0;
@@ -129,7 +129,7 @@ bool getPrefs(Prefs& prefs) {
         prefs.mode          = (bool)settings["mode"];
         prefs.bst           = (bool)settings["bst"];
         prefs.colon         = (bool)settings["colon"];
-        //prefs.flash         = (bool)settings["flash"];
+        prefs.flash         = (bool)settings["flash"];
         prefs.brightness    = (uint32_t)settings["brightness"];
     }
 

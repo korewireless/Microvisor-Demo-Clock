@@ -1,7 +1,6 @@
 /*
  * Microvisor Clock Demo -- Clock class
  *
- * @version     0.1.0
  * @author      Tony Smith
  * @copyright   2023, KORE Wireless
  * @licence     MIT
