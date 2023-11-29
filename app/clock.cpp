@@ -21,7 +21,7 @@ using std::stringstream;
  * @param inDisplay: Reference to the app's display instance.
  * @param gotPrefs:  Have we loaded clock settings yet?
  */
-Clock::Clock(Prefs& inPrefs, HT16K33_Segment& inDisplay, bool gotPrefs)
+Clock::Clock(const Prefs& inPrefs, const HT16K33_Segment& inDisplay, const bool gotPrefs)
     :prefs(inPrefs),
     display(inDisplay),
     receivedPrefs(gotPrefs)
@@ -58,7 +58,7 @@ bool Clock::setTimeFromRTC(void) {
 /**
  * @brief Loop the clock display and update routine.
  */
-void Clock::loop(void) {
+[[noreturn]] void Clock::loop(void) {
 
     const uint32_t configAcquirePeriodMinutes = 4;
 
@@ -133,7 +133,7 @@ void Clock::loop(void) {
  *
  * @returns The BCD encoding.
  */
-uint32_t Clock::bcd(uint32_t rawInt) {
+uint32_t Clock::bcd(uint32_t rawInt) const {
 
     for (uint32_t i = 0 ; i < 8 ; ++i) {
         rawInt <<= 1;
@@ -151,7 +151,7 @@ uint32_t Clock::bcd(uint32_t rawInt) {
  *
  * @returns `true` if DST is active, otherwise `false`.
  */
-bool Clock::isBST(void) {
+bool Clock::isBST(void) const {
 
     return bstCheck();
 }
@@ -162,9 +162,9 @@ bool Clock::isBST(void) {
  *
  * @returns `true` if DST is active, otherwise `false`.
  */
-bool Clock::bstCheck(void) {
+bool Clock::bstCheck(void) const {
 
-    if (month > 3 and month < 10) return true;
+    if (month > 3 && month < 10) return true;
 
     if (month == 3) {
         // BST starts on the last Sunday of March
@@ -194,15 +194,15 @@ bool Clock::bstCheck(void) {
  *
  * @returns The day of the week: 0 (Monday) to 6 (Sunday).
  */
-uint32_t Clock::dayOfWeek(int aDay, int aMonth, int aYear) {
+uint32_t Clock::dayOfWeek(int aDay, int aMonth, int aYear) const {
 
     aMonth -= 2;
     if (aMonth < 1) aMonth += 12;
-    const uint32_t century = (int)(aYear / 100);
+    const uint32_t century = aYear / 100;
     aYear -= (century * 100);
     aYear -= (month > 10 ? 1 : 0);
 
-    int dow = aDay + (int)((13 * aMonth - 1) / 5) + aYear + (int)(year / 4) + (int)(century / 4) - (2 * century);
+    int dow = aDay + ((13 * aMonth - 1) / 5) + aYear + (int)(year / 4) + (int)(century / 4) - (2 * century);
     dow %= 7;
     if (dow < 0) dow += 7;
     return (uint32_t)dow;
@@ -216,8 +216,8 @@ uint32_t Clock::dayOfWeek(int aDay, int aMonth, int aYear) {
  *
  * @returns `true` if the year is a leap year, otherwise `false`.
  */
-bool Clock::isLeapYear(uint32_t aYear) {
+bool Clock::isLeapYear(uint32_t aYear) const {
 
-    if ((aYear % 4 == 0) && ((aYear % 100 > 0 || aYear % 400 == 0))) return true;
+    if ((aYear % 4 == 0) && (aYear % 100 > 0 || aYear % 400 == 0)) return true;
     return false;
 }

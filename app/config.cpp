@@ -25,7 +25,7 @@ void TIM8_BRK_IRQHandler(void);
 
 // Central store for notification records.
 // Holds SHARED_NC_BUFFER_SIZE_R records at a time -- each record is 16 bytes in size.
-static volatile MvNotification  notificationCenter[SHARED_NC_BUFFER_SIZE_R] __attribute__((aligned(8)));
+static          MvNotification  notificationCenter[SHARED_NC_BUFFER_SIZE_R] __attribute__((aligned(8)));
 static volatile uint32_t        notificationIndex = 0;
 static          Handles         handles = { 0, 0, 0 };
        volatile bool            receivedConfig = false;
@@ -44,7 +44,7 @@ bool getPrefs(Prefs& prefs) {
     keyOne.scope = MV_CONFIGKEYFETCHSCOPE_DEVICE;     // A device-level value
     keyOne.store = MV_CONFIGKEYFETCHSTORE_CONFIG;     // A config-type value
     keyOne.key = {
-        .data = (uint8_t*)"prefs",
+        .data = (const uint8_t*)"prefs",
         .length = 5
     };
 
@@ -152,8 +152,8 @@ namespace Channel {
 bool open(void) {
 
     // Set up the HTTP channel's multi-use send and receive buffers
-    static volatile uint8_t configRxBuffer[CONFIG_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
-    static volatile uint8_t configTxBuffer[CONFIG_TX_BUFFER_SIZE_B] __attribute__((aligned(512)));
+    static uint8_t configRxBuffer[CONFIG_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
+    static uint8_t configTxBuffer[CONFIG_TX_BUFFER_SIZE_B] __attribute__((aligned(512)));
 
     if (handles.channel == 0) {
         // No network connection yet? Then establish one
@@ -176,7 +176,7 @@ bool open(void) {
             .send_buffer_len     = sizeof(configTxBuffer),
             .channel_type        = MV_CHANNELTYPE_CONFIGFETCH,
             .endpoint            = {
-                .data = (uint8_t*)"",
+                .data = (const uint8_t*)"",
                 .length = 0
             }
         };
@@ -244,7 +244,7 @@ void open(void) {
         // so we wait for it to come up before opening the data channel -- which
         // would fail otherwise
         enum MvNetworkStatus netStatus;
-        while (1) {
+        while (true) {
             // Request the status of the network connection, identified by its handle.
             // If we're good to continue, break out of the loop...
             if (mvGetNetworkStatus(handles.network, &netStatus) == MV_STATUS_OKAY && netStatus == MV_NETWORKSTATUS_CONNECTED) {
@@ -252,7 +252,7 @@ void open(void) {
             }
 
             // ... or wait a short period before retrying
-            for (volatile unsigned i = 0; i < 50000; ++i) {
+            for (uint32_t i = 0; i < 50000; ++i) {
                 // No op
                 __asm("nop");
             }

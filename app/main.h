@@ -39,7 +39,6 @@
  */
 #define     LED_GPIO_BANK               GPIOA
 #define     LED_GPIO_PIN                GPIO_PIN_5
-#define     LED_FLASH_PERIOD_MS         1000
 
 #define     I2C_GPIO_BANK               GPIOB
 

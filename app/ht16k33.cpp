@@ -18,12 +18,9 @@ using std::string;
  * @param address: The display's I2C address. Default: 0x70.
  */
 HT16K33_Segment::HT16K33_Segment(uint8_t address)
-    :i2cAddr(address),
-    CHARSET{0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F,
-            0x6F, 0x5F, 0x7C, 0x58, 0x5E, 0x7B, 0x71, 0x40, 0x63},
-    POS{0, 2, 6, 8}
+    :i2cAddr(address)
 {
-    if (i2cAddr == 0x00 || i2cAddr > 0x7F) i2cAddr = ADDRESS;
+    if (i2cAddr == 0x00 || i2cAddr > 0x7F) i2cAddr = (uint8_t)DATA::ADDRESS;
 }
 
 
@@ -46,10 +43,10 @@ void HT16K33_Segment::init(uint32_t brightness) {
  * @param on: `true` to turn the display on, `false` to turn it off.
               Default: `true`.
  */
-void HT16K33_Segment::power(bool on) {
+void HT16K33_Segment::power(bool on) const {
 
-    I2C::writeByte(i2cAddr, on ? HT16K33_Segment::GENERIC_SYSTEM_ON : HT16K33_Segment::GENERIC_DISPLAY_OFF);
-    I2C::writeByte(i2cAddr, on ? HT16K33_Segment::GENERIC_DISPLAY_ON : HT16K33_Segment::GENERIC_SYSTEM_OFF);
+    I2C::writeByte(i2cAddr, on ? (uint8_t)CMD::GENERIC_SYSTEM_ON : (uint8_t)CMD::GENERIC_DISPLAY_OFF);
+    I2C::writeByte(i2cAddr, on ? (uint8_t)CMD::GENERIC_DISPLAY_ON : (uint8_t)CMD::GENERIC_SYSTEM_OFF);
 }
 
 
@@ -58,10 +55,10 @@ void HT16K33_Segment::power(bool on) {
  *
  * @param brightness: A value from 0 to 15. Default: 15.
  */
-void HT16K33_Segment::setBrightness(uint32_t brightness) {
+void HT16K33_Segment::setBrightness(uint32_t brightness) const {
 
     if (brightness > 15) brightness = 15;
-    I2C::writeByte(i2cAddr, HT16K33_Segment::GENERIC_CMD_BRIGHTNESS | brightness);
+    I2C::writeByte(i2cAddr, (uint8_t)CMD::GENERIC_BRIGHTNESS | (uint8_t)brightness);
 }
 
 
@@ -85,7 +82,7 @@ HT16K33_Segment& HT16K33_Segment::clear() {
  */
 HT16K33_Segment& HT16K33_Segment::setColon(bool isSet) {
 
-    buffer[HT16K33_Segment::SEGMENT_COLON_ROW] = isSet ? 0x02 : 0x00;
+    buffer[(int)SEGMENT::COLON_ROW] = isSet ? 0x02 : 0x00;
     return *this;
 }
 
@@ -104,7 +101,7 @@ HT16K33_Segment& HT16K33_Segment::setGlyph(uint32_t glyph, uint32_t digit, bool 
 
     if (digit > 4) return *this;
     if (glyph > 0xFF) return *this;
-    buffer[HT16K33_Segment::POS[digit]] = glyph;
+    buffer[HT16K33_Segment::POS[digit]] = (uint8_t)glyph;
     if (hasDot) buffer[HT16K33_Segment::POS[digit]] |= 0x80;
     return *this;
 }
@@ -124,7 +121,7 @@ HT16K33_Segment& HT16K33_Segment::setNumber(uint32_t number, uint32_t digit, boo
 
     if (digit > 4) return *this;
     if (number > 9) return *this;
-    return setAlpha('0' + number, digit, hasDot);
+    return setAlpha('0' + (char)number, digit, hasDot);
 }
 
 
@@ -144,11 +141,11 @@ HT16K33_Segment& HT16K33_Segment::setAlpha(char chr, uint32_t digit, bool hasDot
 
     uint8_t charVal = 0xFF;
     if (chr == ' ') {
-        charVal = HT16K33_Segment::SEGMENT_SPACE_CHAR;
+        charVal = (uint8_t)SEGMENT::SPACE_CHAR;
     } else if (chr == '-') {
-        charVal = HT16K33_Segment::SEGMENT_MINUS_CHAR;
+        charVal = (uint8_t)SEGMENT::MINUS_CHAR;
     } else if (chr == 'o') {
-        charVal = HT16K33_Segment::SEGMENT_DEGREE_CHAR;
+        charVal = (uint8_t)SEGMENT::DEGREE_CHAR;
     } else if (chr >= 'a' && chr <= 'f') {
         charVal = (uint8_t)chr - 87;
     } else if (chr >= '0' && chr <= '9') {
@@ -156,8 +153,8 @@ HT16K33_Segment& HT16K33_Segment::setAlpha(char chr, uint32_t digit, bool hasDot
     }
 
     if (charVal == 0xFF) return *this;
-    buffer[HT16K33_Segment::POS[digit]] = HT16K33_Segment::CHARSET[charVal];
-    if (hasDot) buffer[HT16K33_Segment::POS[digit]] |= 0x80;
+    buffer[POS[digit]] = CHARSET[charVal];
+    if (hasDot) buffer[POS[digit]] |= 0x80;
     return *this;
 }
 
@@ -165,7 +162,7 @@ HT16K33_Segment& HT16K33_Segment::setAlpha(char chr, uint32_t digit, bool hasDot
 /**
  * @brief Write the display buffer out to I2C.
  */
-void HT16K33_Segment::draw() {
+void HT16K33_Segment::draw() const {
 
     // Set up the buffer holding the data to be
     // transmitted to the LED

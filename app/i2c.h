@@ -15,7 +15,7 @@
  */
 namespace I2C {
 
-    void        setup(uint32_t address);
+    void        setup(uint8_t address);
     void        writeByte(uint8_t address, uint8_t byte);
     void        writeBlock(uint8_t address, uint8_t *data, uint8_t count);
 }

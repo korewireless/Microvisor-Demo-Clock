@@ -18,13 +18,6 @@ static        void setupGPIO(void);
 static        void logDeviceInfo(void);
 static inline void setDefaults(Prefs& settings);
 
-/*
- * GLOBALS
- */
-// I2C-related values
-I2C_HandleTypeDef i2c;
-bool doUseI2C = false;
-
 
 /**
  * @brief Get the MV clock value.
@@ -59,7 +52,7 @@ void system_clock_config(void) {
 static void setupGPIO(void) {
 
     // Enable GPIO port clock
-    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE()
 
     // Configure GPIO pin for the on-board LED
     GPIO_InitTypeDef gpio_init = { 0 };
@@ -80,7 +73,7 @@ static void setupGPIO(void) {
 static void setupI2C(void) {
 
     // Initialize the I2C bus for the display and sensor
-    I2C::setup(HT16K33_Segment::ADDRESS);
+    I2C::setup((uint8_t)HT16K33_Segment::DATA::ADDRESS);
 }
 
 
@@ -130,7 +123,7 @@ int main() {
     setupI2C();
 
     // Instantiate the display driver
-    HT16K33_Segment display = HT16K33_Segment(HT16K33_Segment::ADDRESS);
+    auto display = HT16K33_Segment();
     display.init();
 
     // Create a preferencs store and
@@ -160,7 +153,7 @@ int main() {
     }
 
     // Instantiate a Clock object and run it
-    Clock mvclock = Clock(prefs, display, gotPrefs);
+    auto mvclock = Clock(prefs, display, gotPrefs);
     mvclock.loop();
 
     // Just in case...

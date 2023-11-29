@@ -12,9 +12,7 @@
 /*
  * GLOBALS
  */
-// Defined in `main.cpp`
-extern      I2C_HandleTypeDef   i2c;
-extern      bool                doUseI2C;
+I2C_HandleTypeDef   i2c;
 
 
 #ifdef __cplusplus
@@ -36,12 +34,12 @@ namespace I2C {
  *
  * @returns `true` if the device is present, otherwise `false`.
  */
-static bool check(uint32_t address) {
+static bool check(uint8_t address) {
 
     uint8_t timeoutCount = 0;
 
     while(true) {
-        HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(&i2c, (uint8_t)address << 1, 1, 100);
+        HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(&i2c, (uint16_t)(address << 1), 1, 100);
         if (status == HAL_OK) {
             return true;
         } else {
@@ -70,7 +68,7 @@ static bool check(uint32_t address) {
  *
  * Takes values from #defines set in `i2c.h`
  */
-void setup(uint32_t targetAddress) {
+void setup(uint8_t targetAddress) {
 
     // I2C1 pins are:
     //   SDA -> PB9
@@ -92,7 +90,7 @@ void setup(uint32_t targetAddress) {
     }
 
     // I2C is up, so check peripheral availability
-    doUseI2C = check(targetAddress);
+    check(targetAddress);
 }
 
 
@@ -104,7 +102,7 @@ void setup(uint32_t targetAddress) {
  */
 void writeByte(uint8_t address, uint8_t byte) {
 
-    HAL_I2C_Master_Transmit(&i2c, address << 1, &byte, 1, 100);
+    HAL_I2C_Master_Transmit(&i2c, (uint16_t)(address << 1), &byte, 1, 100);
 }
 
 
@@ -116,7 +114,7 @@ void writeByte(uint8_t address, uint8_t byte) {
  */
 void writeBlock(uint8_t address, uint8_t *data, uint8_t count) {
 
-    HAL_I2C_Master_Transmit(&i2c, address << 1, data, count, 100);
+    HAL_I2C_Master_Transmit(&i2c, (uint16_t)(address << 1), data, count, 100);
 }
 
 
@@ -128,7 +126,7 @@ void writeBlock(uint8_t address, uint8_t *data, uint8_t count) {
  *
  * @param i2c: A HAL I2C_HandleTypeDef pointer to the I2C instance.
  */
-void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c) {
+void HAL_I2C_MspInit([[maybe_unused]] I2C_HandleTypeDef *i2cBus) {
 
     // This SDK-named function is called by HAL_I2C_Init()
 
@@ -144,7 +142,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c) {
     }
 
     // Enable the I2C GPIO interface clock
-    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE()
 
     // Configure the GPIO pins for I2C
     // Pin PB6 - SCL
@@ -160,5 +158,5 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c) {
     HAL_GPIO_Init(I2C_GPIO_BANK, &gpioConfig);
 
     // Enable the I2C1 clock
-    __HAL_RCC_I2C1_CLK_ENABLE();
+    __HAL_RCC_I2C1_CLK_ENABLE()
 }

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 # Set application data
 set(APP "Microvisor Clock Demo")
 set(VERSION_NUMBER "0.1.2")
-set(BUILD_NUMBER "4")
+set(BUILD_NUMBER "9")
 
 message("Building ${APP} ${VERSION_NUMBER} build ${BUILD_NUMBER}")
 

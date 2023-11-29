@@ -24,18 +24,18 @@ class Clock {
 
     public:
         // Constructor
-        Clock(Prefs& inPrefs, HT16K33_Segment& inDisplay, bool gotPrefs);
+        Clock(const Prefs& inPrefs, const HT16K33_Segment& inDisplay, const bool gotPrefs);
         // Methods
         bool                setTimeFromRTC(void);
-        void                loop(void);
+        [[noreturn]] void   loop(void);
 
     private:
         //Methods
-        uint32_t            bcd(uint32_t bin_value);
-        bool                isBST(void);
-        bool                bstCheck(void);
-        uint32_t            dayOfWeek(int a_day, int a_month, int a_year);
-        bool                isLeapYear(uint32_t a_year);
+        uint32_t            bcd(uint32_t bin_value) const;
+        bool                isBST(void) const;
+        bool                bstCheck(void) const;
+        uint32_t            dayOfWeek(int a_day, int a_month, int a_year) const;
+        bool                isLeapYear(uint32_t a_year) const;
         // Properties
         uint32_t            hour = 0;
         uint32_t            minutes = 0;
@@ -43,7 +43,6 @@ class Clock {
         uint32_t            year = 0;
         uint32_t            month = 0;
         uint32_t            day = 0;
-        bool                isTimeSet = false;
         // Following set by constructor
         Prefs               prefs;
         HT16K33_Segment     display;
