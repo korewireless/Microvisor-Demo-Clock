@@ -85,6 +85,6 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: mv-freertos-cmsis-demo-mac-docker
+        name: mv-clock-demo-mac-docker
         path: ${{ github.workspace }}/build/app/microvisor-cpp-clock-demo.*
         if-no-files-found: error
