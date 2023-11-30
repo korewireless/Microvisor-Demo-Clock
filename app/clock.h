@@ -1,7 +1,6 @@
 /*
  * Microvisor Clock Demo -- Clock class
  *
- * @version     0.1.0
  * @author      Tony Smith
  * @copyright   2023, KORE Wireless
  * @licence     MIT
@@ -16,6 +15,7 @@ typedef struct {
     bool        bst;        // Display according to current daylight savings
     bool        colon;      // Show the colon separator between hours and minutes on the display
     bool        flash;      // Flash the colon separator if it's being shown
+    bool        led;        // Flash the LED in sync with the colon
     uint32_t    brightness; // Display brightness (1-15)
 } Prefs;
 
@@ -24,30 +24,29 @@ class Clock {
 
     public:
         // Constructor
-        Clock(Prefs& in_prefs, HT16K33_Segment& in_display, bool got_prefs);
-
-        bool                set_time_from_rtc(void);
-        void                loop(void);
+        Clock(const Prefs& inPrefs, const HT16K33_Segment& inDisplay, const bool gotPrefs);
+        // Methods
+        bool                setTimeFromRTC(void);
+        [[noreturn]] void   loop(void);
 
     private:
-        uint32_t            bcd(uint32_t bin_value);
-        bool                is_bst(void);
-        bool                bst_check(void);
-        uint32_t            day_of_week(int a_day, int a_month, int a_year);
-        bool                is_leap_year(uint32_t a_year);
-
+        //Methods
+        uint32_t            bcd(uint32_t bin_value) const;
+        bool                isBST(void) const;
+        bool                bstCheck(void) const;
+        uint32_t            dayOfWeek(int a_day, int a_month, int a_year) const;
+        bool                isLeapYear(uint32_t a_year) const;
+        // Properties
         uint32_t            hour = 0;
         uint32_t            minutes = 0;
         uint32_t            seconds = 0;
         uint32_t            year = 0;
         uint32_t            month = 0;
         uint32_t            day = 0;
-
-        bool                is_time_set = false;
-
+        // Following set by constructor
         Prefs               prefs;
         HT16K33_Segment     display;
-        bool                received_prefs;
+        bool                receivedPrefs;
 };
 
 

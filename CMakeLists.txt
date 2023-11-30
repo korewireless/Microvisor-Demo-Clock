@@ -6,6 +6,8 @@ set(PROJECT_NAME "microvisor-cpp-clock-demo")
 # Set to 0 to build without remote debugging enabled
 set(ENABLE_REMOTE_DEBUGGING 1)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
 # Set to false to stop '[DEBUG]' messages being logged
 add_compile_definitions(LOG_DEBUG_MESSAGES=true)
 
@@ -60,6 +62,8 @@ target_include_directories(ST_Code PUBLIC
 target_link_libraries(ST_Code LINK_PUBLIC
     Microvisor-HAL-STM32U5
 )
+
+add_subdirectory(ArduinoJson)
 
 # Load the application
 add_subdirectory(app)

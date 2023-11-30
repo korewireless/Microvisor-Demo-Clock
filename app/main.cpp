@@ -1,7 +1,6 @@
 /*
  * Microvisor Clock Demo -- main file
  *
- * @version     0.1.0
  * @author      Tony Smith
  * @copyright   2023, KORE Wireless
  * @licence     MIT
@@ -14,17 +13,10 @@
 /*
  * STATIC PROTOTYPES
  */
-static        void setup_i2c(void);
-static        void setup_gpio(void);
-static        void log_device_info(void);
-static inline void set_defaults(Prefs& settings);
-
-/*
- * GLOBALS
- */
-// I2C-related values
-I2C_HandleTypeDef i2c;
-bool do_use_i2c = false;
+static        void setupI2C(void);
+static        void setupGPIO(void);
+static        void logDeviceInfo(void);
+static inline void setDefaults(Prefs& settings);
 
 
 /**
@@ -57,10 +49,10 @@ void system_clock_config(void) {
  * and as an interrupt source (GPIO Pin PF3) connected to the
  * LIS3DH motion sensor.
  */
-static void setup_gpio(void) {
+static void setupGPIO(void) {
 
     // Enable GPIO port clock
-    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE()
 
     // Configure GPIO pin for the on-board LED
     GPIO_InitTypeDef gpio_init = { 0 };
@@ -78,23 +70,38 @@ static void setup_gpio(void) {
 /**
  * @brief Initialise the modem power pin.
  */
-static void setup_i2c(void) {
+static void setupI2C(void) {
 
     // Initialize the I2C bus for the display and sensor
-    I2C::setup(HT16K33_ADDRESS);
+    I2C::setup((uint8_t)HT16K33_Segment::DATA::ADDRESS);
+}
+
+
+/**
+ * @brief Punch in default settings.
+ *
+ * @param settings: Reference to the app's Prefs.
+ */
+static inline void setDefaults(Prefs& settings) {
+
+    settings.mode = false;
+    settings.bst = true;
+    settings.colon = true;
+    settings.flash = true;
+    settings.led = false;
+    settings.brightness = 15;
 }
 
 
 /**
  * @brief Show basic device info.
  */
-static void log_device_info(void) {
+static void logDeviceInfo(void) {
 
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
     server_log("Device: %s", buffer);
-    server_log("   App: %s %s", APP_NAME, APP_VERSION);
-    server_log(" Build: %i", BUILD_NUM);
+    server_log("   App: %s %s-%u", APP_NAME, APP_VERSION, BUILD_NUM);
 }
 
 
@@ -111,22 +118,22 @@ int main() {
     system_clock_config();
 
     // Set up the hardware
-    setup_gpio();
-    setup_i2c();
+    setupGPIO();
+    setupI2C();
 
     // Instantiate the display driver
-    HT16K33_Segment display = HT16K33_Segment(HT16K33_ADDRESS);
+    auto display = HT16K33_Segment();
     display.init();
 
     // Create a preferencs store and
     // set the defaults
     Prefs prefs;
-    set_defaults(prefs);
+    setDefaults(prefs);
 
     // Display SYNC while we wait for the RTC to be set
-    uint8_t sync[4] = {0x6D, 0x6E, 0x37, 0x39};
+    const uint8_t sync[4] = {0x6D, 0x6E, 0x37, 0x39};
     display.init(prefs.brightness);
-    for (uint32_t i = 0 ; i < 4 ; ++i) display.set_glyph(sync[i], i, false);
+    for (uint32_t i = 0 ; i < 4 ; ++i) display.setGlyph(sync[i], i, false);
     display.draw();
 
     // Open the network
@@ -134,35 +141,17 @@ int main() {
     Config::Network::open();
 
     // Get the Device ID and build number
-    log_device_info();
+    logDeviceInfo();
 
     // Load in the clock settings
-    bool got_prefs = Config::get_prefs(prefs);
-    if (got_prefs) {
+    const bool gotPrefs = Config::getPrefs(prefs);
+    if (gotPrefs) {
         server_log("Clock settings retrieved");
     } else {
         server_error("Clock settings not yet retrieved");
     }
 
     // Instantiate a Clock object and run it
-    Clock mvclock = Clock(prefs, display, got_prefs);
+    auto mvclock = Clock(prefs, display, gotPrefs);
     mvclock.loop();
-
-    // Just in case...
-    return 0;
-}
-
-
-/**
- * @brief Punch in default settings.
- *
- * @param settings: Reference to the app's Prefs.
- */
-static inline void set_defaults(Prefs& settings) {
-
-    settings.mode = false;
-    settings.bst = true;
-    settings.colon = true;
-    settings.flash = true;
-    settings.brightness = 4;
 }

@@ -1,9 +1,8 @@
 /*
- * cellular::i2c_utils for Raspberry Pi Pico
+ * Microvisor Clock Demo -- I2C namespace
  *
- * @version     0.1.0
- * @author      smittytone
- * @copyright   2021
+ * @author      Tony Smith
+ * @copyright   2023, KORE Wireless
  * @licence     MIT
  *
  */
@@ -13,9 +12,7 @@
 /*
  * GLOBALS
  */
-// Defined in `main.cpp`
-extern      I2C_HandleTypeDef   i2c;
-extern      bool                do_use_i2c;
+I2C_HandleTypeDef   i2c;
 
 
 #ifdef __cplusplus
@@ -31,11 +28,47 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c);
 namespace I2C {
 
 /**
+ * @brief Check for presence of a known device by its I2C address.
+ *
+ * @param address: The device's address.
+ *
+ * @returns `true` if the device is present, otherwise `false`.
+ */
+static bool check(uint8_t address) {
+
+    uint8_t timeoutCount = 0;
+
+    while(true) {
+        HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(&i2c, (uint16_t)(address << 1), 1, 100);
+        if (status == HAL_OK) {
+            return true;
+        } else {
+            uint32_t err = HAL_I2C_GetError(&i2c);
+            server_error("HAL_I2C_IsDeviceReady() : %i", status);
+            server_error("HAL_I2C_GetError():       %li", err);
+        }
+
+        // Flash the LED eight times on device not ready
+        for (uint8_t i = 0 ; i < 8 ; ++i) {
+            HAL_GPIO_TogglePin(LED_GPIO_BANK, LED_GPIO_PIN);
+            HAL_Delay(100);
+        }
+
+        HAL_Delay(1000);
+        timeoutCount++;
+        if (timeoutCount > 10) break;
+    }
+
+    return false;
+}
+
+
+/**
  * @brief Set up the I2C block.
  *
  * Takes values from #defines set in `i2c.h`
  */
-void setup(uint32_t target_i2c_address) {
+void setup(uint8_t targetAddress) {
 
     // I2C1 pins are:
     //   SDA -> PB9
@@ -56,44 +89,8 @@ void setup(uint32_t target_i2c_address) {
         return;
     }
 
-    // I2C is up, so check peripheral readiness
-    do_use_i2c = check(target_i2c_address);
-}
-
-
-/**
- * @brief Check for presence of a known device by its I2C address.
- *
- * @param address: The device's address.
- *
- * @returns `true` if the device is present, otherwise `false`.
- */
-bool check(uint32_t address) {
-
-    uint8_t timeout_count = 0;
-
-    while(true) {
-        HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(&i2c, (uint8_t)address << 1, 1, 100);
-        if (status == HAL_OK) {
-            return true;
-        } else {
-            uint32_t err = HAL_I2C_GetError(&i2c);
-            server_error("HAL_I2C_IsDeviceReady() : %i", status);
-            server_error("HAL_I2C_GetError():       %li", err);
-        }
-
-        // Flash the LED eight times on device not ready
-        for (uint8_t i = 0 ; i < 8 ; ++i) {
-            HAL_GPIO_TogglePin(LED_GPIO_BANK, LED_GPIO_PIN);
-            HAL_Delay(100);
-        }
-
-        HAL_Delay(1000);
-        timeout_count++;
-        if (timeout_count > 10) break;
-    }
-
-    return false;
+    // I2C is up, so check peripheral availability
+    check(targetAddress);
 }
 
 
@@ -103,9 +100,9 @@ bool check(uint32_t address) {
  * @param address: The I2C address of the device to write to.
  * @param byte:    The byte to send.
  */
-void write_byte(uint8_t address, uint8_t byte) {
+void writeByte(uint8_t address, uint8_t byte) {
 
-    HAL_I2C_Master_Transmit(&i2c, address << 1, &byte, 1, 100);
+    HAL_I2C_Master_Transmit(&i2c, (uint16_t)(address << 1), &byte, 1, 100);
 }
 
 
@@ -115,9 +112,9 @@ void write_byte(uint8_t address, uint8_t byte) {
  * @param address: The I2C address of the device to write to.
  * @param byte:    The byte to send.
  */
-void write_block(uint8_t address, uint8_t *data, uint8_t count) {
+void writeBlock(uint8_t address, uint8_t *data, uint8_t count) {
 
-    HAL_I2C_Master_Transmit(&i2c, address << 1, data, count, 100);
+    HAL_I2C_Master_Transmit(&i2c, (uint16_t)(address << 1), data, count, 100);
 }
 
 
@@ -129,7 +126,7 @@ void write_block(uint8_t address, uint8_t *data, uint8_t count) {
  *
  * @param i2c: A HAL I2C_HandleTypeDef pointer to the I2C instance.
  */
-void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c) {
+void HAL_I2C_MspInit([[maybe_unused]] I2C_HandleTypeDef *i2cBus) {
 
     // This SDK-named function is called by HAL_I2C_Init()
 
@@ -145,7 +142,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c) {
     }
 
     // Enable the I2C GPIO interface clock
-    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE()
 
     // Configure the GPIO pins for I2C
     // Pin PB6 - SCL
@@ -161,5 +158,5 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c) {
     HAL_GPIO_Init(I2C_GPIO_BANK, &gpioConfig);
 
     // Enable the I2C1 clock
-    __HAL_RCC_I2C1_CLK_ENABLE();
+    __HAL_RCC_I2C1_CLK_ENABLE()
 }

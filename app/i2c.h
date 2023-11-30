@@ -1,9 +1,8 @@
 /*
- * cellular::i2c
+ * Microvisor Clock Demo -- I2C namespace
  *
- * @version     0.1.0
- * @author      smittytone
- * @copyright   2021
+ * @author      Tony Smith
+ * @copyright   2023, KORE Wireless
  * @licence     MIT
  *
  */
@@ -12,20 +11,13 @@
 
 
 /*
- * CONSTANTS
- */
-#define     I2C_GPIO_BANK           GPIOB
-
-
-/*
- * PROTOTYPES
+ * NAMESPACES
  */
 namespace I2C {
 
-    void        setup(uint32_t address);
-    bool        check(uint32_t address);
-    void        write_byte(uint8_t address, uint8_t byte);
-    void        write_block(uint8_t address, uint8_t *data, uint8_t count);
+    void        setup(uint8_t address);
+    void        writeByte(uint8_t address, uint8_t byte);
+    void        writeBlock(uint8_t address, uint8_t *data, uint8_t count);
 }
 
 

@@ -1,7 +1,6 @@
 /*
- * Config
+ * Microvisor Clock Demo -- Config namespace
  *
- * @version     0.1.0
  * @author      smittytone
  * @copyright   2021
  * @licence     MIT
@@ -12,26 +11,23 @@
 
 
 /*
- * CONSTANTS
+ * ENUMERATIONS
  */
-#define     SHARED_NC_BUFFER_SIZE_R             16
-#define     CONFIG_WAIT_PERIOD_MS               4000
-#define     CONFIG_RX_BUFFER_SIZE_B             512
-#define     CONFIG_TX_BUFFER_SIZE_B             512
-
-#define     USER_TAG_LOGGING_REQUEST_NETWORK    1
-#define     USER_TAG_LOGGING_OPEN_CHANNEL       2
-#define     USER_TAG_HTTP_OPEN_CHANNEL          3
-#define     USER_TAG_CONFIG_OPEN_CHANNEL        4
+enum class USER_TAG: uint32_t {
+    LOGGING_REQUEST_NETWORK = 1,
+    LOGGING_OPEN_CHANNEL,
+    HTTP_OPEN_CHANNEL,
+    CONFIG_OPEN_CHANNEL
+};
 
 
 /*
  * STRUCTURES
  */
 typedef struct {
-    MvNotificationHandle notification;
-    MvNetworkHandle      network;
-    MvChannelHandle      channel;
+    MvNotificationHandle    notification;
+    MvNetworkHandle         network;
+    MvChannelHandle         channel;
 } Handles;
 
 
@@ -41,16 +37,17 @@ typedef struct {
 namespace Config {
 
     namespace Channel {
-        bool    open(void);
-        void    close(void);
+        bool                open(void);
+        void                close(void);
     }
 
     namespace Network {
-        void    open(void);
-        void    setup_notification_center(void);
+        void                open(void);
+        bool                setupNotificationCenter(void);
+        uint32_t            getState(void);
     }
 
-    bool    get_prefs(Prefs& prefs);
+    bool                    getPrefs(Prefs& prefs);
 }
 
 

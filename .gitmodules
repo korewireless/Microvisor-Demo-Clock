@@ -1,3 +1,6 @@
 [submodule "Microvisor-HAL-STM32U5"]
 	path = Microvisor-HAL-STM32U5
 	url = https://github.com/korewireless/Microvisor-HAL-STM32U5
+[submodule "ArduinoJson"]
+	path = ArduinoJson
+	url = https://github.com/bblanchon/ArduinoJson.git
