@@ -1,5 +1,7 @@
 on:
   push:
+    branches:
+      - develop
   pull_request:
   workflow_dispatch:
   schedule:
@@ -10,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Get application code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Get Pre-reqs
@@ -18,7 +20,7 @@ jobs:
     - name: Build application code
       run: cmake -S . -B build && cmake --build build
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mv-clock-demo-linux-native
         path: ${{ github.workspace }}/build/app/microvisor-cpp-clock-demo.*
@@ -28,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Get application code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Build Docker image
@@ -36,7 +38,7 @@ jobs:
     - name: Build application code
       run: docker run --rm -v $(pwd)/:/home/mvisor/project/ --env BUILD_ONLY=true --name mv-clock-lin-dock mv-clock-image-lin-dock
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mv-clock-demo-linux-docker
         path: ${{ github.workspace }}/build/app/microvisor-cpp-clock-demo.*
@@ -53,7 +55,7 @@ jobs:
       with:
         distribution: Ubuntu-20.04
     - name: Get application code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Get Pre-reqs
@@ -61,7 +63,7 @@ jobs:
     - name: Build code
       run: cmake -S . -B build && cmake --build build
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mv-clock-demo-win-wsl
         path: ${{ github.workspace }}/build/app/microvisor-cpp-clock-demo.*
@@ -71,7 +73,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Get application code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Get Docker
@@ -83,7 +85,7 @@ jobs:
     - name: Build code
       run: docker run --rm -v $(pwd)/:/home/mvisor/project/ --env BUILD_ONLY=true --name mv-clock-mac-dock mv-clock-image-mac-dock
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mv-clock-demo-mac-docker
         path: ${{ github.workspace }}/build/app/microvisor-cpp-clock-demo.*
