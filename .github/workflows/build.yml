@@ -4,8 +4,6 @@ on:
       - develop
   pull_request:
   workflow_dispatch:
-  schedule:
-    - cron: '0 18 * * *'
 jobs:
   build_linux_native:
     name: Build on Linux with native tools
@@ -90,3 +88,20 @@ jobs:
         name: mv-clock-demo-mac-docker
         path: ${{ github.workspace }}/build/app/microvisor-cpp-clock-demo.*
         if-no-files-found: error
+  build_mac_native:
+    name: Build on macOS with native tooling
+    runs-on: macos-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    - name: Get Pre-reqs
+      run: brew install --cask gcc-arm-embedded
+    - name: Build code
+      run: cmake -S . -B build && cmake --build build
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: mv-clock-demo-mac-native
+        path: ${{ github.workspace }}/build/app/microvisor-cpp-clock-demo.*
