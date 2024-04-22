@@ -62,6 +62,6 @@ Adafruit offers an [inexpensive HT16K33-based display breakout](https://www.adaf
 
 ## License
 
-This application is © 2023 KORE Wireless and is licensed under the [MIT License](.LICENSE.md).
+This application is © 2024 KORE Wireless and is licensed under the [MIT License](.LICENSE.md).
 
-It contains ArduinoJson, which is © 2023 Benoit Blanchon and licensed under the [MIT License](.LICENSE.md).
+It contains ArduinoJson, which is © 2024 Benoit Blanchon and licensed under the [MIT License](.LICENSE.md).

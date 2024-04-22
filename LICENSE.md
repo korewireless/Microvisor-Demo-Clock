@@ -1,6 +1,6 @@
 # MIT License
 
-### Microvisor C++ Clock Demo copyright 2023 KORE Wireless
+### Microvisor C++ Clock Demo copyright 2024 KORE Wireless
 
 ### ArduinoJson copyright 2021 Benoit Blanchon
 

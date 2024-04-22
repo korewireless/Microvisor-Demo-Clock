@@ -2,7 +2,7 @@
  * Microvisor Clock Demo -- HT16K33 display driver
  *
  * @author      Tony Smith
- * @copyright   2023, KORE Wireless
+ * @copyright   2024, KORE Wireless
  * @licence     MIT
  *
  */
