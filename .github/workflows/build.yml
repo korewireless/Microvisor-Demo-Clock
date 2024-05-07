@@ -66,28 +66,6 @@ jobs:
         name: mv-clock-demo-win-wsl
         path: ${{ github.workspace }}/build/app/microvisor-cpp-clock-demo.*
         if-no-files-found: error
-  build_mac_docker:
-    name: Build on macOS with Docker
-    runs-on: macos-latest
-    steps:
-    - name: Get application code
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
-    - name: Get Docker
-      run: brew install docker
-    - name: Run Docker
-      run: colima start
-    - name: Build docker image
-      run: docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t mv-clock-image-mac-dock .
-    - name: Build code
-      run: docker run --rm -v $(pwd)/:/home/mvisor/project/ --env BUILD_ONLY=true --name mv-clock-mac-dock mv-clock-image-mac-dock
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: mv-clock-demo-mac-docker
-        path: ${{ github.workspace }}/build/app/microvisor-cpp-clock-demo.*
-        if-no-files-found: error
   build_mac_native:
     name: Build on macOS with native tooling
     runs-on: macos-latest

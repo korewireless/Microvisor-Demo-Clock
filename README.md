@@ -1,5 +1,7 @@
 # Microvisor C++ Clock Demo
 
+[![.github/workflows/build.yml](https://github.com/korewireless/Microvisor-Demo-Clock/actions/workflows/build.yml/badge.svg)](https://github.com/korewireless/Microvisor-Demo-Clock/actions/workflows/build.yml)
+
 This rudimentary digital clock sample demonstrates Microvisor application development using C++.
 
 It makes use of a Microvisor Nucleo Development Board and a four-digit seven-segment LED display driven by the Holtek HT16K33 controller. These I&sup2;C devices are widely available from electronics suppliers. Interaction with the I&sup2; bus is mediated by the [STM32U585 HAL](#working-with-c-and-the-stm32u585-hal) (Hardware Abstraction Layer).
