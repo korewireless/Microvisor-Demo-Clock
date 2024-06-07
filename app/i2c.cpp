@@ -12,16 +12,12 @@
 /*
  * GLOBALS
  */
-I2C_HandleTypeDef   i2c;
+I2C_HandleTypeDef i2c;
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 // Required on STM32 HAL callouts implemented in C++
-void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c);
 #ifdef __cplusplus
-}
+extern "C" void HAL_I2C_MspInit(I2C_HandleTypeDef *i2c);
 #endif
 
 
@@ -44,7 +40,7 @@ static bool check(uint8_t address) {
             return true;
         } else {
             uint32_t err = HAL_I2C_GetError(&i2c);
-            server_error("HAL_I2C_IsDeviceReady() : %i", status);
+            server_error("HAL_I2C_IsDeviceReady():  %i", status);
             server_error("HAL_I2C_GetError():       %li", err);
         }
 
@@ -85,7 +81,7 @@ void setup(uint8_t targetAddress) {
 
     // Initialize the I2C itself with the i2c handle
     if (HAL_I2C_Init(&i2c) != HAL_OK) {
-        server_error("I2C init failed");
+        server_error("[I2C] INITIALIZATION FAILURE");
         return;
     }
 
@@ -102,7 +98,8 @@ void setup(uint8_t targetAddress) {
  */
 void writeByte(uint8_t address, uint8_t byte) {
 
-    HAL_I2C_Master_Transmit(&i2c, (uint16_t)(address << 1), &byte, 1, 100);
+    HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(&i2c, (uint16_t)(address << 1), &byte, 1, 100);
+    if (status != HAL_OK) server_error("[I2C] WRITE BYTE FAILURE");
 }
 
 
@@ -114,7 +111,8 @@ void writeByte(uint8_t address, uint8_t byte) {
  */
 void writeBlock(uint8_t address, uint8_t *data, uint8_t count) {
 
-    HAL_I2C_Master_Transmit(&i2c, (uint16_t)(address << 1), data, count, 100);
+    HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(&i2c, (uint16_t)(address << 1), data, count, 100);
+    if (status != HAL_OK) server_error("[I2C] WRITE BLOCK FAILURE");
 }
 
 
@@ -137,7 +135,7 @@ void HAL_I2C_MspInit([[maybe_unused]] I2C_HandleTypeDef *i2cBus) {
 
     // Initialize U5 peripheral clock
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
-        server_error("HAL_RCCEx_PeriphCLKConfig() failed");
+        server_error("[I2C] I2C PERIPHERAL CLOCK COULD NOT BE SET");
         return;
     }
 

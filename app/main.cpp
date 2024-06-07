@@ -131,9 +131,9 @@ int main() {
     setDefaults(prefs);
 
     // Display SYNC while we wait for the RTC to be set
-    const uint8_t sync[4] = {0x6D, 0x6E, 0x37, 0x39};
+    constexpr uint8_t SYNC_TEXT[4] = {0x6D, 0x6E, 0x37, 0x39};
     display.init(prefs.brightness);
-    for (uint32_t i = 0 ; i < 4 ; ++i) display.setGlyph(sync[i], i, false);
+    for (uint32_t i = 0 ; i < 4 ; ++i) display.setGlyph(SYNC_TEXT[i], i, false);
     display.draw();
 
     // Open the network
@@ -146,9 +146,9 @@ int main() {
     // Load in the clock settings
     const bool gotPrefs = Config::getPrefs(prefs);
     if (gotPrefs) {
-        server_log("Clock settings retrieved");
+        server_log("Clock settings received");
     } else {
-        server_error("Clock settings not yet retrieved");
+        server_error("Clock settings not yet received");
     }
 
     // Instantiate a Clock object and run it

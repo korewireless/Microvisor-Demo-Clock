@@ -9,7 +9,10 @@
 #include "main.h"
 
 
-using std::string;
+/*
+ * CONSTANTS
+ */
+constexpr uint32_t SIZE_OF_TX_BUFFER_BYTES = 17;
 
 
 /**
@@ -166,7 +169,7 @@ void HT16K33_Segment::draw() const {
 
     // Set up the buffer holding the data to be
     // transmitted to the LED
-    static uint8_t txBuffer[17] = {0};
+    static uint8_t txBuffer[SIZE_OF_TX_BUFFER_BYTES] = {0};
 
     // Span the 8 bytes of the graphics buffer
     // across the 16 bytes of the LED's buffer
@@ -175,5 +178,5 @@ void HT16K33_Segment::draw() const {
     }
 
     // Write out the transmit buffer
-    I2C::writeBlock(i2cAddr, txBuffer, sizeof(txBuffer));
+    I2C::writeBlock(i2cAddr, txBuffer, SIZE_OF_TX_BUFFER_BYTES);
 }

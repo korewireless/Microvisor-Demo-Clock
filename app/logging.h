@@ -3,7 +3,7 @@
  * Microvisor Remote Debugging Demo
  *
  * Copyright © 2024, KORE Wireless
- * Licence: Apache 2.0
+ * Licence: MIT
  *
  */
 #ifndef LOGGING_H

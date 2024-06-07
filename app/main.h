@@ -14,13 +14,9 @@
  * INCLUDES
  */
 #include <string>
-#include <vector>
 #include <cstdlib>
 #include <cstdint>
 #include <cstring>
-#include <sstream>
-#include <iomanip>
-#include <algorithm>
 // Microvisor + HAL
 #include "stm32u5xx_hal.h"
 #include "mv_syscalls.h"
@@ -50,6 +46,7 @@ enum class NET_STATE: uint32_t {
     OFFLINE = 0,
     ONLINE = 1,
     CONNECTING = 2,
+    DISCONNECTEDWITHLINKUP = 3,
     UNKNOWN = 99
 };
 

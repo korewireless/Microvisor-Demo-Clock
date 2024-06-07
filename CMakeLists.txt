@@ -2,10 +2,6 @@ cmake_minimum_required(VERSION 3.14)
 
 # Set project name
 set(PROJECT_NAME "microvisor-cpp-clock-demo")
-
-# Set to 0 to build without remote debugging enabled
-set(ENABLE_REMOTE_DEBUGGING 1)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 # Set to false to stop '[DEBUG]' messages being logged
@@ -14,7 +10,7 @@ add_compile_definitions(LOG_DEBUG_MESSAGES=true)
 # Set to false to stop UART debugging for disconnected apps
 # This requires additional hardware: an FTDI USB-to-UART cable,
 # connected to GPIO pin PD5 (board TX, cable RX) and GND
-add_compile_definitions(ENABLE_UART_DEBUGGING=true)
+#add_compile_definitions(ENABLE_UART_DEBUGGING=true)
 
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain.cmake")
 
@@ -63,7 +59,8 @@ target_link_libraries(ST_Code LINK_PUBLIC
     Microvisor-HAL-STM32U5
 )
 
+# Load and build the dependencieas
 add_subdirectory(ArduinoJson)
 
-# Load the application
+# Load and build the application
 add_subdirectory(app)

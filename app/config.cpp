@@ -1,25 +1,19 @@
 /*
- * Microvisor Clock Demo -- Config namespace
+ * Microvisor Clock Demo -- Config Namespace
  *
- * @author      smittytone
- * @copyright   2021
+ * @author      Tony Smith
+ * @copyright   2024, KORE Wireless
  * @licence     MIT
  *
  */
 #include "main.h"
 
 
-using std::vector;
-using std::string;
-
-
+/*
+ * FORWARD DECLARATIONS
+ */
 #ifdef __cplusplus
-extern "C" {
-#endif
-// Required on STM32 HAL callouts implemented in C++
-void TIM8_BRK_IRQHandler(void);
-#ifdef __cplusplus
-}
+extern "C" void TIM8_BRK_IRQHandler(void);
 #endif
 
 
@@ -37,7 +31,7 @@ namespace Config {
 
 bool getPrefs(Prefs& prefs) {
 
-    const uint32_t configWaitPeriodMS = 4000;
+    constexpr uint32_t CONFIG_WAIT_PERIOD_MS = 4000;
 
     // Check for a valid channel handle
     if (!Channel::open()) return false;
@@ -73,7 +67,7 @@ bool getPrefs(Prefs& prefs) {
 
     while (true) {
         // Break out after timeout or successful config retrieval
-        if (receivedConfig || (HAL_GetTick() - startTick > configWaitPeriodMS)) break;
+        if (receivedConfig || (HAL_GetTick() - startTick > CONFIG_WAIT_PERIOD_MS)) break;
         __asm("nop");
     }
 
@@ -214,6 +208,7 @@ void close(void) {
         enum MvStatus status = mvCloseChannel(&handles.channel);
         if (status == MV_STATUS_OKAY) {
             server_log("Config Channel closed (handle %lu)", oldHandle);
+            handles.channel = nullptr;
         } else {
             server_error("Could not close Config Channel");
         }
@@ -367,4 +362,3 @@ void TIM8_BRK_IRQHandler(void) {
         notification.event_type = (MvEventType)0;
     }
 }
-

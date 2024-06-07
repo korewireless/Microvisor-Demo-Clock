@@ -9,11 +9,6 @@
 #include "main.h"
 
 
-using std::vector;
-using std::string;
-using std::stringstream;
-
-
 /**
  * @brief Basic driver for HT16K33-based display.
  *
@@ -23,8 +18,8 @@ using std::stringstream;
  */
 Clock::Clock(const Prefs& inPrefs, const HT16K33_Segment& inDisplay, const bool gotPrefs)
     :prefs(inPrefs),
-    display(inDisplay),
-    receivedPrefs(gotPrefs)
+     display(inDisplay),
+     receivedPrefs(gotPrefs)
 {}
 
 
@@ -37,18 +32,33 @@ Clock::Clock(const Prefs& inPrefs, const HT16K33_Segment& inDisplay, const bool 
 bool Clock::setTimeFromRTC(void) {
 
     static char timestamp[65] = {0};
+    static struct tm timeStore;
     uint64_t usec = 0;
+    uint32_t now_year;
+    uint32_t now_month;
+    uint32_t now_day;
+    uint32_t now_hour;
+    uint32_t now_mins;
+    uint32_t now_secs;
 
     if (mvGetWallTime(&usec) == MV_STATUS_OKAY) {
         // Get the time in seconds
-        time_t secs = (time_t)usec / 1000000;
+        const time_t secs = (time_t)usec / 1000000;
 
         // Write time string as "2022-05-10 13:30:58"
-        strftime(timestamp, 48, "%F %T", gmtime(&secs));
-
-        // Convert the hour, minute and second values back
-        sscanf(timestamp, "%lu-%lu-%lu %lu:%lu:%lu", &year, &month, &day, &hour, &minutes, &seconds);
-        return true;
+        if (strftime(timestamp, 64, "%F %T", gmtime_r(&secs, &timeStore)) > 0) {
+            // Convert the hour, minute and second values back
+            int result = sscanf(timestamp, "%lu-%lu-%lu %lu:%lu:%lu", &now_year, &now_month, &now_day, &now_hour, &now_mins, &now_secs);
+            if (result == 6) {
+                year = now_year;
+                month = now_month;
+                day = now_day;
+                hour = now_hour;
+                minutes = now_mins;
+                seconds = now_secs;
+                return true;
+            }
+        }
     }
 
     return false;
@@ -60,7 +70,10 @@ bool Clock::setTimeFromRTC(void) {
  */
 [[noreturn]] void Clock::loop(void) {
 
-    const uint32_t configAcquirePeriodMinutes = 4;
+    constexpr uint32_t CONFIG_ACQUIRE_PERIOD_MINS = 4;
+
+    // Update brightness
+    display.setBrightness(prefs.brightness);
 
     while (true) {
         // Check the time
@@ -81,19 +94,20 @@ bool Clock::setTimeFromRTC(void) {
         // The decimal point by the first digit is used to indicate
         // connection status (lit if the clock is disconnected)
         uint32_t netState = Config::Network::getState();
-        uint32_t decimal = bcd(displayHour);
+        auto decimal = (uint8_t)(bcd(displayHour) & 0xFF);
         display.setNumber(decimal & 0x0F, 1, false);
         if (!prefs.mode && displayHour < 10) {
+            // Show a blank space in the first digit
             display.setGlyph(0, 0, (netState != (uint32_t)NET_STATE::ONLINE));
         } else {
-            display.setNumber(decimal >> 4, 0, (netState != (uint32_t)NET_STATE::ONLINE));
+            display.setNumber((decimal >> 4) & 0x0F, 0, (netState != (uint32_t)NET_STATE::ONLINE));
         }
 
         // Display the minute
         // The decimal point by the last digit is used to indicate AM/PM,
         // but only for the 12-hour clock mode (mode == False)
-        decimal = bcd(minutes);
-        display.setNumber(decimal >> 4, 2, false);
+        decimal = (uint8_t)(bcd(minutes) & 0xFF);
+        display.setNumber((decimal >> 4) & 0x0F, 2, false);
         display.setNumber(decimal & 0x0F, 3, (prefs.mode ? false : isPM));
 
         // Set the colon and present the display
@@ -114,23 +128,27 @@ bool Clock::setTimeFromRTC(void) {
         display.draw();
 
         // Reload prefs if we haven't done so yet
-        if (!receivedPrefs && minutes != 0 && minutes % configAcquirePeriodMinutes == 0) {
+        if (netState == (uint32_t)NET_STATE::ONLINE && !receivedPrefs && minutes != 0 && minutes % CONFIG_ACQUIRE_PERIOD_MINS == 0) {
             receivedPrefs = Config::getPrefs(prefs);
             if (receivedPrefs) {
+                // Update brightness
+                display.setBrightness(prefs.brightness);
                 server_log("Clock settings retrieved");
             } else {
                 server_error("Clock settings not retrieved (%u)", minutes);
             }
         }
 
-        // Update brightness
-        display.setBrightness(prefs.brightness);
+        // Reset the prefs get flag periodically
+        if (minutes != 0 && minutes % 15 == 0) {
+            receivedPrefs = false;
+        }
     }
 }
 
 
 /**
- * @brief Convert an integer to a bimary coded decimal representation.
+ * @brief Convert an integer to a binary coded decimal representation.
  *
  * @param rawInt: The source value.
  *
@@ -138,14 +156,16 @@ bool Clock::setTimeFromRTC(void) {
  */
 uint32_t Clock::bcd(uint32_t rawInt) const {
 
-    for (uint32_t i = 0 ; i < 8 ; ++i) {
-        rawInt <<= 1;
-        if (i == 7) break;
-        if ((rawInt & 0x0F00) > 0x04FF) rawInt += 0x0300;
-        if ((rawInt & 0xF000) > 0x4FFF) rawInt += 0x3000;
+    uint32_t result = 0;
+    uint32_t shift = 0;
+
+    while (rawInt) {
+        result += ((rawInt % 10) << shift);
+        rawInt = rawInt / 10;
+        shift += 4;
     }
 
-    return (rawInt >> 8) & 0xFF;
+    return (result & 0xFF);
 }
 
 

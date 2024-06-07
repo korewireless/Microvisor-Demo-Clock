@@ -1,8 +1,8 @@
 /*
- * Microvisor Clock Demo -- Config namespace
+ * Microvisor Clock Demo -- Config Namespace
  *
- * @author      smittytone
- * @copyright   2021
+ * @author      Tony Smith
+ * @copyright   2024, KORE Wireless
  * @licence     MIT
  *
  */
